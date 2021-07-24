@@ -1,4 +1,4 @@
-import { Light, Pattern, Response } from "@devlights/types";
+import { CustomData, Light, Pattern, Response } from "@devlights/types";
 import { AxiosResponse } from "axios";
 
 export type Theme = "Light" | "Dark" | "System-Default";
@@ -24,6 +24,7 @@ export type LightsStackParamList = {
   custom: {
     id: string;
     type: "tag" | "light";
+    custom_sequence?: CustomData[];
     onSubmit: () => Promise<Pattern>;
   };
   color_modal: ColorModal;

@@ -8,7 +8,9 @@ export const lightEquality = (l: Light, r: Light): boolean => {
     ledsEquality(l.leds, r.leds) &&
     isEqual(l?.tags, r?.tags) &&
     isEqual(l.count, r.count) &&
-    isEqual(l.name, r.name)
+    isEqual(l.name, r.name) &&
+    isEqual(l.position, r.position) &&
+    isEqual(l.custom_sequence, r.custom_sequence)
   );
 };
 
@@ -32,7 +34,7 @@ export const tagArrayEquality = (l: string[], r: string[]) => {
 export const lightsEquality = (l: Light[], r: Light[]): boolean => {
   if (l.length !== r.length) return false;
   for (let i = 0; i < l.length; i++) {
-    if (!isEqual(l[i], r[i])) return false;
+    if (!lightEquality(l[i], r[i])) return false;
   }
   return true;
 };

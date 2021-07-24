@@ -1,8 +1,10 @@
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { FAB, useTheme } from "react-native-paper";
+import { Divider, FAB, useTheme } from "react-native-paper";
 import { Custom } from "../../interfaces/types";
 import ChangeableText from "../ChangeableText";
 import Circle from "../Circle";
@@ -11,9 +13,10 @@ import { LightScreenNavigationProp } from "../LightScreen/LightScreen";
 export interface CustomDataProps {
   custom: Custom;
   onChange: (c: Custom) => void;
+  onRemove: (i?: number) => void;
 }
 export default function CustomData(props: CustomDataProps): JSX.Element {
-  const { custom } = props;
+  const { custom, onRemove } = props;
   const [repeat, setRepeat] = React.useState<number>(custom.repeat);
   const [colors, setColors] = React.useState<string[]>(custom.leds);
   const [error, setError] = React.useState<boolean>(false);
@@ -44,6 +47,13 @@ export default function CustomData(props: CustomDataProps): JSX.Element {
     }
   };
 
+  const onRemoveColor = (index: number) => {
+    const cols = colors;
+    cols.splice(index, 1);
+    setColors(cols);
+    props.onChange({ leds: cols, repeat });
+  };
+
   const styles = StyleSheet.create({
     colors_container: {
       flexDirection: "row",
@@ -51,7 +61,11 @@ export default function CustomData(props: CustomDataProps): JSX.Element {
       flexWrap: "wrap",
     },
     opacity: {
-      marginLeft: theme.spacing(1),
+      marginTop: theme.spacing(2),
+      marginLeft: theme.spacing(3),
+    },
+    icon: {
+      alignSelf: "center",
     },
   });
   return (
@@ -66,6 +80,7 @@ export default function CustomData(props: CustomDataProps): JSX.Element {
         {colors.map((c: string, i: number) => (
           <TouchableOpacity
             style={styles.opacity}
+            onLongPress={() => onRemoveColor(i)}
             onPress={() => {
               navigation.navigate("color_modal", {
                 color: c,
@@ -84,6 +99,18 @@ export default function CustomData(props: CustomDataProps): JSX.Element {
           onPress={() => setColors([...colors, "#000"])}
         />
       </View>
+      <Divider style={{ marginTop: theme.spacing(2) }} />
+      <TouchableOpacity
+        onPress={() => onRemove()}
+        style={{ margin: theme.spacing(2) }}
+      >
+        <FontAwesomeIcon
+          size={26}
+          style={styles.icon}
+          color={theme.colors.secondary}
+          icon={faTrash}
+        />
+      </TouchableOpacity>
     </>
   );
 }

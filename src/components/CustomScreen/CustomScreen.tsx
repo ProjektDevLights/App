@@ -22,10 +22,12 @@ export type CustomScreenRouteProp = RouteProp<LightsStackParamList, "custom">;
 export default function CustomScreen(): JSX.Element {
   const route = useRoute<CustomScreenRouteProp>();
   const navigation = useNavigation();
-  const { id, type, onSubmit } = route.params;
-  const [custom, setCustom] = React.useState<Custom[]>([
-    { leds: ["#000"], repeat: 1 },
-  ]);
+  const { id, type, onSubmit, custom_sequence } = route.params;
+  const [custom, setCustom] = React.useState<Custom[]>(
+    custom_sequence?.length && custom_sequence.length > 0
+      ? route.params.custom_sequence
+      : [{ leds: ["#000"], repeat: 1 }],
+  );
   const theme = useTheme();
   const snackbar = useSnackbar();
 
@@ -56,6 +58,15 @@ export default function CustomScreen(): JSX.Element {
       });
   };
 
+  const onRemove = (index: number) => {
+    const customs = [...custom];
+
+    if (index > -1) {
+      customs.splice(index, 1);
+      setCustom(customs);
+    }
+  };
+
   const styles = StyleSheet.create({
     container: { height: "100%", width: "100%" },
     icon: {
@@ -69,6 +80,7 @@ export default function CustomScreen(): JSX.Element {
           <CustomData
             custom={c}
             key={i.toString()}
+            onRemove={() => onRemove(i)}
             onChange={(newCustom: Custom) => onChange(newCustom, i)}
           />
           <Divider />

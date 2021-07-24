@@ -1,4 +1,4 @@
-import { Pattern } from "@devlights/types";
+import { CustomData, Pattern } from "@devlights/types";
 import { AxiosResponse } from "axios";
 import React from "react";
 import { StyleSheet } from "react-native";
@@ -14,6 +14,7 @@ export interface PatternComponentProps {
   oldPattern?: Pattern | string | undefined;
   newPattern: Pattern;
   colors: string[];
+  custom_sequence?: CustomData[];
   timeout: number | undefined;
   disabled: boolean;
   onSubmit: (
@@ -27,12 +28,24 @@ export interface PatternComponentProps {
 export default function PatternComponent(
   props: PatternComponentProps,
 ): JSX.Element {
-  const { newPattern, oldPattern, colors, disabled, timeout, id, type } = props;
+  const {
+    newPattern,
+    oldPattern,
+    colors,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    custom_sequence,
+    disabled,
+    timeout,
+    id,
+    type,
+  } = props;
   const styles = StyleSheet.create({
     text: {
       textAlign: "center",
     },
   });
+
+  console.log(custom_sequence);
   const onSubmit = async (
     newColor: string | string[],
     newTimeout?: number,
@@ -101,6 +114,7 @@ export default function PatternComponent(
             oldPattern={oldPattern}
             colors={colors}
             id={id}
+            custom_sequence={custom_sequence}
             type={type}
             onSubmit={onSubmit}
           />

@@ -26,7 +26,6 @@ function lightsReducer(
       lights = action.lights;
       return lights;
     case SET_LIGHT:
-      console.log("set light");
       lights = [...state];
       index = lights.findIndex((l: Light) => l.id === action.id);
       if (index !== undefined) {

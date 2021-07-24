@@ -79,6 +79,7 @@ export default function LightScreen(): JSX.Element {
   }, []);
 
   React.useEffect(() => {
+    console.log(light);
     if (!light) {
       navigation.goBack();
       snackbar.makeSnackbar(
@@ -262,7 +263,8 @@ export default function LightScreen(): JSX.Element {
             newPattern={light?.leds.pattern ?? fallBacklight.leds.pattern}
             oldPattern={oldPattern}
             timeout={light?.leds.timeout ?? undefined}
-            colors={light?.leds.colors ?? fallBacklight.leds.colors}
+            colors={light?.leds?.colors ?? fallBacklight.leds.colors}
+            custom_sequence={light?.custom_sequence}
             onSubmit={changeColor}
           />
         </View>

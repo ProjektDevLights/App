@@ -64,9 +64,7 @@ export default function BrightnessSlider(props: SliderProps): JSX.Element {
     },
   });
 
-  const disabled =
-    some(realLights, (l: Light) => l.leds.pattern === "custom") ||
-    some(realLights, (l: Light) => !l.isOn);
+  const disabled = some(realLights, (l: Light) => !l.isOn);
 
   const updateBrightness = (b: number) => {
     realLights.forEach((l: Light) => {

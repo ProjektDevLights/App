@@ -2,7 +2,7 @@ import { Alarm, Light, Response } from "@devlights/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
 import * as SplashScreen from "expo-splash-screen";
-import { orderBy } from "lodash";
+import { isEqual, orderBy, sortBy } from "lodash";
 import Lottie from "lottie-react-native";
 import allSettled from "promise.allsettled";
 import * as React from "react";
@@ -90,9 +90,23 @@ export default function Home(): JSX.Element {
     return theme;
   };
 
+  const sortLights = (pLights: Light[]) => {
+    const orderLights = orderBy(pLights, ["position"], ["asc"]);
+
+    store.dispatch(setAllLights(orderLights));
+  };
+
+  React.useEffect(() => {
+    console.log("change");
+
+    sortLights(lights);
+  }, [lights]);
+
   const joinSocket = () => {
     const s = io("http://devlight");
     s.on("light_change", (light: Light) => {
+      if (light.name === "Fake 3") console.log("fake change");
+
       store.dispatch(setLight(light.id, light));
     });
     s.on("light_add", (light: Light) => {
@@ -118,11 +132,6 @@ export default function Home(): JSX.Element {
     setSocket(s);
   };
 
-  const sortLights = (pLights: Light[]) => {
-    const orderLights = orderBy(pLights, (l: Light) => l.position);
-    store.dispatch(setAllLights(orderLights));
-  };
-
   const fetch = async () => {
     setLoading(true);
     setError(false);
@@ -142,7 +151,7 @@ export default function Home(): JSX.Element {
     allSettled(promises).then((val: any[]) => {
       try {
         if (val[1]) {
-          sortLights(val[1].value.data.object);
+          sortLights(val[1].value.data.object, true);
         } else {
           store.dispatch(setAllLights([]));
           setError(true);
