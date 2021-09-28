@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import { Light } from "@devlights/types";
+import { CustomData, Light } from "@devlights/types";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { max, min } from "lodash";
@@ -62,38 +62,6 @@ export default function LightCard(props: CardProps): JSX.Element {
     });
   };
 
-  const getBoxCounts = (lightCount: number): number[] => {
-    const count: number = max([2, min([lightCount, 10])]) as number;
-    const count1: number = Math.round(count / 2);
-    return [count1, count - count1];
-  };
-  const getFlexAmounts = (lightcount: number): number[][] => {
-    const flexAmounts: number[][] = [];
-    getBoxCounts(lightcount).forEach((amount: number, index: number) => {
-      switch (amount) {
-        case 1:
-          flexAmounts.push([5]);
-          break;
-        case 2:
-          flexAmounts.push(index === 1 ? [2, 3] : [3, 2]);
-          break;
-        case 3:
-          flexAmounts.push(index === 1 ? [1, 2, 2] : [2, 2, 1]);
-          break;
-        case 4:
-          flexAmounts.push(index === 1 ? [1, 1, 2, 1] : [1, 2, 1, 1]);
-          break;
-        case 5:
-          flexAmounts.push([1, 1, 1, 1, 1]);
-          break;
-        default:
-          flexAmounts.push([5]);
-          break;
-      }
-    });
-    return flexAmounts;
-  };
-
   const styles = StyleSheet.create({
     card: {
       width: "100%",
@@ -151,6 +119,8 @@ export default function LightCard(props: CardProps): JSX.Element {
     },
     custom_container: {
       flex: 1,
+      flexDirection: "row",
+      backgroundColor: "#000",
     },
     custom_container_inner: {
       flex: 1,
@@ -225,8 +195,22 @@ export default function LightCard(props: CardProps): JSX.Element {
         ) : (
           <View style={styles.custom_container}>
             {
+              light.custom_sequence?.map((c: CustomData) => {
+                return (
+                  <View style={{ flex: c.repeat, flexDirection: "row" }}>
+                    {c.leds.map((col: string) => (
+                      <View
+                        style={{
+                          backgroundColor: light.isOn ? col : "#000",
+                          flex: c.repeat / c.leds.length,
+                        }}
+                      />
+                    ))}
+                  </View>
+                );
+              })
               // @ts-ignore
-              getFlexAmounts(light.leds.colors.length).map(
+              /* getFlexAmounts(light.leds.colors.length).map(
                 (counts: number[]) => (
                   <View style={styles.custom_container_inner}>
                     {counts.map((amount: number) => {
@@ -244,7 +228,7 @@ export default function LightCard(props: CardProps): JSX.Element {
                     })}
                   </View>
                 ),
-              )
+              ) */
             }
           </View>
         )}

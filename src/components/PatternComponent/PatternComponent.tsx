@@ -45,7 +45,6 @@ export default function PatternComponent(
     },
   });
 
-  console.log(custom_sequence);
   const onSubmit = async (
     newColor: string | string[],
     newTimeout?: number,

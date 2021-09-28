@@ -6,7 +6,16 @@ import { isEqual, orderBy, sortBy } from "lodash";
 import Lottie from "lottie-react-native";
 import allSettled from "promise.allsettled";
 import * as React from "react";
-import { Dimensions, StatusBar, StyleSheet, View } from "react-native";
+import {
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import DraggableFlatList, {
   DragEndParams,
   RenderItemParams,
@@ -78,6 +87,7 @@ export default function Home(): JSX.Element {
     (l: Light[], r: Light[]) => lightsEquality(l, r),
   );
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [refreshing, setRefreshing] = React.useState<boolean>(false);
   const [error, setError] = React.useState<boolean>(false);
   const [socket, setSocket] = React.useState<Socket | null>(null);
 
@@ -97,16 +107,12 @@ export default function Home(): JSX.Element {
   };
 
   React.useEffect(() => {
-    console.log("change");
-
     sortLights(lights);
   }, [lights]);
 
   const joinSocket = () => {
     const s = io("http://devlight");
     s.on("light_change", (light: Light) => {
-      if (light.name === "Fake 3") console.log("fake change");
-
       store.dispatch(setLight(light.id, light));
     });
     s.on("light_add", (light: Light) => {
@@ -132,7 +138,8 @@ export default function Home(): JSX.Element {
     setSocket(s);
   };
 
-  const fetch = async () => {
+  const fetch = async (pRefresh = false) => {
+    if (pRefresh) setRefreshing(true);
     setLoading(true);
     setError(false);
     const fetching = fetchTheme();
@@ -167,11 +174,12 @@ export default function Home(): JSX.Element {
           store.dispatch(setAlarms([]));
         }
         setLoading(false);
-
+        if (refreshing) setRefreshing(false);
         if (socket === null || socket?.connected === false) {
           joinSocket();
         }
       } catch {
+        if (refreshing) setRefreshing(false);
         setLoading(false);
         setError(true);
       }
@@ -241,12 +249,16 @@ export default function Home(): JSX.Element {
         backgroundColor={theme.colors.background}
         barStyle="light-content"
       />
+
       <DraggableFlatList
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetch} />
+        }
         data={lights}
         ListHeaderComponent={<Title style={styles.title}>Lights</Title>}
         style={{ height: Dimensions.get("window").height * 0.8 }}
-        onRefresh={fetch}
         contentContainerStyle={styles.contentContainerStyle}
+        nestedScrollEnabled
         ListEmptyComponent={
           loading && !error ? (
             <Spinner visible={loading} />

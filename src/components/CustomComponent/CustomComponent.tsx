@@ -1,5 +1,5 @@
 import { CustomData, Pattern } from "@devlights/types";
-import { faEdit, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
@@ -29,13 +29,10 @@ export default function CustomComponent(
       id,
       type,
       onSubmit,
-      custom_sequence: pCustom_sequence,
+      custom_sequence: pCustom_sequence ?? undefined,
     });
   };
   const styles = StyleSheet.create({
-    container: {
-      justifyContent: "center",
-    },
     colors_container: {
       marginTop: theme.spacing(2),
       flexDirection: "row",
@@ -67,7 +64,7 @@ export default function CustomComponent(
   return (
     <View>
       {oldPattern === "custom" ? (
-        <View style={styles.container}>
+        <>
           <Text style={styles.text}> Colors used in this Custom Pattern</Text>
           <View style={styles.colors_container}>
             {colors.map((c: string) => (
@@ -87,15 +84,15 @@ export default function CustomComponent(
               />
             </TouchableOpacity>
           </View>
-        </View>
+        </>
       ) : undefined}
       <Button
         mode="contained"
         color={theme.colors.accent}
         style={styles.button}
-        onPress={() => navigate([])}
+        onPress={navigate}
       >
-        Create new custom
+        Create new custom pattern
       </Button>
     </View>
   );

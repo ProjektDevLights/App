@@ -79,7 +79,6 @@ export default function LightScreen(): JSX.Element {
   }, []);
 
   React.useEffect(() => {
-    console.log(light);
     if (!light) {
       navigation.goBack();
       snackbar.makeSnackbar(
@@ -115,7 +114,6 @@ export default function LightScreen(): JSX.Element {
       });
       ax.then((res: LightResponse) => {
         success = true;
-        //dispatch(setLight(light.id, res.data.object));
         snackbar.makeSnackbar(res.data.message, theme.colors.success);
       });
       ax.catch((err: AxiosError) => {
@@ -148,7 +146,6 @@ export default function LightScreen(): JSX.Element {
       timeout: timeout ?? light.leds.timeout,
     });
     ax.then((res: LightResponse) => {
-      //dispatch(setLight(light.id, res.data.object));
       snackbar.makeSnackbar(res.data.message, theme.colors.success);
     }).catch((err: AxiosError) => {
       snackbar.makeSnackbar(
