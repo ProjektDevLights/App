@@ -48,11 +48,11 @@ export default function TagScreen(): JSX.Element {
 
   const lights: Light[] = useSelector(
     (state: Store) => state.lights.filter((l) => l.tags?.includes(tag)),
-    (l: Light[], r: Light[]) => tagsEquality(l, r, lights.length, tag),
+    (l: Light[], r: Light[]) => tagsEquality(l, r, l.length, tag),
   );
 
   React.useEffect(() => {
-    if (!lights || lights.length < 1) {
+    if (!lights || lights?.length < 1) {
       dispatch(removeTag(params.tag));
       navigation.goBack();
       snackbar.makeSnackbar(
@@ -97,7 +97,7 @@ export default function TagScreen(): JSX.Element {
       );
       setLeds({ colors: ["#000000"], pattern: "unkown", timeout: undefined });
     });
-    return await ax;
+    return ax;
   };
 
   const styles = StyleSheet.create({
