@@ -23,6 +23,7 @@ import DraggableFlatList, {
 import { ActivityIndicator, Text, Title, useTheme } from "react-native-paper";
 import { useSelector, useStore } from "react-redux";
 import { io, Socket } from "socket.io-client";
+import { useHost } from "../../hooks/useHost";
 import useNetwork from "../../hooks/useNetwork";
 import { LightResponse, Theme } from "../../interfaces/types";
 import { Store } from "../../store";
@@ -82,6 +83,7 @@ export function Spinner(props: SpinnerProps): JSX.Element {
 export default function Home(): JSX.Element {
   const theme = useTheme();
   const store = useStore();
+  const host = useHost();
   const lights: Light[] = useSelector(
     (state: Store) => state.lights,
     (l: Light[], r: Light[]) => lightsEquality(l, r),
@@ -111,31 +113,39 @@ export default function Home(): JSX.Element {
   }, [lights]);
 
   const joinSocket = () => {
-    const s = io("http://devlight");
-    s.on("light_change", (light: Light) => {
+    const socketHost = `${`${host.getHostName()}:${host.getPort()}`}`;
+
+    const s = io(socketHost);
+
+    setSocket(s);
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    listen();
+  };
+
+  const listen = () => {
+    socket?.on("light_change", (light: Light) => {
       store.dispatch(setLight(light.id, light));
     });
-    s.on("light_add", (light: Light) => {
+    socket?.on("light_add", (light: Light) => {
       store.dispatch(setLight(light.id, light));
     });
-    s.on("light_remove", (light: Light) => {
+    socket?.on("light_remove", (light: Light) => {
       store.dispatch(removeLight(light.id));
     });
-    s.on("light_change_multiple", (pLights: Light[]) => {
+    socket?.on("light_change_multiple", (pLights: Light[]) => {
       pLights.forEach((light: Light) => {
         store.dispatch(setLight(light.id, light));
       });
     });
-    s.on("alarm_change", (alarm: Alarm) => {
+    socket?.on("alarm_change", (alarm: Alarm) => {
       store.dispatch(editAlarm(alarm));
     });
-    s.on("alarm_add", (alarm: Alarm) => {
+    socket?.on("alarm_add", (alarm: Alarm) => {
       store.dispatch(addAlarm(alarm));
     });
-    s.on("alarm_remove", (alarm: Alarm) => {
+    socket?.on("alarm_remove", (alarm: Alarm) => {
       store.dispatch(removeAlarm(alarm));
     });
-    setSocket(s);
   };
 
   const fetch = async (pRefresh = false) => {
@@ -158,7 +168,7 @@ export default function Home(): JSX.Element {
     allSettled(promises).then((val: any[]) => {
       try {
         if (val[1]) {
-          sortLights(val[1].value.data.object, true);
+          sortLights(val[1].value.data.object);
         } else {
           store.dispatch(setAllLights([]));
           setError(true);
@@ -213,6 +223,15 @@ export default function Home(): JSX.Element {
         sortLights(res.data.object);
       });
   };
+
+  React.useEffect(() => {
+    fetch();
+    joinSocket();
+    return () => {
+      socket?.disconnect();
+      setSocket(null);
+    };
+  }, [host.getHostName(), host.getPort()]);
 
   React.useEffect(() => {
     fetch();

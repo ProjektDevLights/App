@@ -7,6 +7,7 @@ import { List, Title, useTheme } from "react-native-paper";
 import { useSelector } from "react-redux";
 import { Theme } from "../../interfaces/types";
 import { Store } from "../../store";
+import HostSettings from "../HostSettings";
 import ThemeDialog from "../ThemeDialog";
 
 export default function Settings(): JSX.Element {
@@ -68,6 +69,7 @@ export default function Settings(): JSX.Element {
           />
           <ThemeDialog visible={visible} onDismiss={() => setVisible(false)} />
         </List.Section>
+        <HostSettings />
       </ScrollView>
     </View>
   );
