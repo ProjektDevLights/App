@@ -1,16 +1,14 @@
-import { isEqual } from "lodash";
 import * as React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Avatar, Text } from "react-native-paper";
-import { useSelector } from "react-redux";
-import { Store } from "../../store";
+import { useFavourites } from "../../hooks/useFavourites";
 
 export interface FavouriteListProps {
   onPress: (fav: string) => void;
 }
 
 export default function FavouriteList(props: FavouriteListProps): JSX.Element {
-  const favouriteColors : string[] = useSelector((state: Store) => state.favouriteColors, isEqual);
+  const favouriteColors: string[] = useFavourites().colors;
   const styles = StyleSheet.create({
     container: { width: "100%", height: 120, alignItems: "center" },
     scrollview: { height: 45, marginBottom: 30 },
@@ -33,11 +31,7 @@ export default function FavouriteList(props: FavouriteListProps): JSX.Element {
             });
             return (
               <Pressable key={fav} onPress={() => props.onPress(fav)}>
-                <Avatar.Text
-                  size={40}
-                  style={style.avatar}
-                  label=""
-                />
+                <Avatar.Text size={40} style={style.avatar} label="" />
               </Pressable>
             );
           })

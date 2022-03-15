@@ -1,13 +1,11 @@
 import { Alarm } from "@devlights/types";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { isEqual } from "lodash";
 import moment from "moment";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { IconButton, Text, useTheme } from "react-native-paper";
-import { useSelector } from "react-redux";
-import { Store } from "../../store";
+import { useAlarms } from "../../hooks/useAlarms";
 
 export interface AlarmFooterProps {
   isActive: boolean;
@@ -17,10 +15,15 @@ export interface AlarmFooterProps {
 
 function AlarmFooter(props: AlarmFooterProps): JSX.Element {
   const { isActive, onPress, id } = props;
-  const alarm = useSelector(
-    (state: Store) => state.alarms.find((a: Alarm) => a.id === id) as Alarm,
-    (l: Alarm, r: Alarm) => isEqual(l.days, r.days) || isEqual(l.name, r.name),
-  );
+  const { alarms } = useAlarms();
+  const alarm = alarms.find((a: Alarm) => a.id === id) ?? {
+    days: [],
+    time: "00:00",
+    id: "",
+    isOn: false,
+    leds: { pattern: "plain", colors: ["#000"] },
+    lights: [],
+  };
   const theme = useTheme();
   const styles = StyleSheet.create({
     root: {

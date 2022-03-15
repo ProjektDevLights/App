@@ -1,19 +1,16 @@
+import { Light } from "@devlights/types";
 import { faPlus, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Divider, List, Text, useTheme } from "react-native-paper";
-import React from "react";
-import { Light } from "@devlights/types";
 import { useNavigation } from "@react-navigation/core";
 import axios, { AxiosError } from "axios";
-import { useDispatch } from "react-redux";
 import { map } from "lodash";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Modalize } from "react-native-modalize";
-import { setLight } from "../../store/actions/lights";
-import ApplyDialog from "../ApplyDialog";
-import { LightResponse } from "../../interfaces/types";
-import { removeTag } from "../../store/actions/tags";
+import { Divider, List, Text, useTheme } from "react-native-paper";
 import useSnackbar from "../../hooks/useSnackbar";
+import { useTags } from "../../hooks/useTags";
+import ApplyDialog from "../ApplyDialog";
 
 export interface LightListProps {
   lights: Light[];
@@ -24,7 +21,7 @@ export default function LightsList(props: LightListProps): JSX.Element {
   const { lights, tag } = props;
   const navigation = useNavigation();
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const { fetch: fetchTags } = useTags();
   const snackbar = useSnackbar();
   const modalizeRef = React.useRef<Modalize>(null);
 
@@ -41,7 +38,7 @@ export default function LightsList(props: LightListProps): JSX.Element {
     ax.then(() => {
       if (lights.length <= 1 && !silent) {
         navigation.goBack();
-        dispatch(removeTag(tag));
+        fetchTags();
         snackbar.makeSnackbar("Tag has been removed!", theme.colors.error);
       }
     });

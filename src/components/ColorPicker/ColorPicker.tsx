@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { faStar } from "@fortawesome/free-regular-svg-icons";
 import { faStar as fullstar } from "@fortawesome/free-solid-svg-icons";
@@ -10,14 +9,9 @@ import { Pressable, StyleSheet, View } from "react-native";
 // @ts-ignore
 import HsvColorPicker from "react-native-hsv-color-picker";
 import { Button, Text, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
 import tinycolor, { ColorFormats } from "tinycolor2";
+import { useFavourites } from "../../hooks/useFavourites";
 import { LightsStackParamList } from "../../interfaces/types";
-import { Store } from "../../store";
-import {
-  addFavouriteColor,
-  removeFavouriteColor,
-} from "../../store/actions/favourites";
 import FavouriteList from "../FavouriteList/FavouriteList";
 
 export type ColorModalScreenNavigationProp = StackNavigationProp<
@@ -34,11 +28,8 @@ export default function ColorPicker(): JSX.Element {
   const route = useRoute<ColorModalScreenRouteProp>();
   const { color } = route.params;
   const navigation = useNavigation();
-  const dispatch = useDispatch();
   const theme = useTheme();
-  const favouriteColors: string[] = useSelector(
-    (state: Store) => state.favouriteColors,
-  );
+  const { colors: favouriteColors, removeColor, addColor } = useFavourites();
   const [hsv, setHsv] = React.useState<ColorFormats.HSV>(
     tinycolor(color ?? "#fff").toHsv(),
   );
@@ -47,10 +38,10 @@ export default function ColorPicker(): JSX.Element {
   const { colors } = theme;
   const saveColor = () => {
     if (favouriteColors.includes(tinycolor.fromRatio(hsv).toHexString())) {
-      dispatch(removeFavouriteColor(tinycolor.fromRatio(hsv).toHexString()));
+      removeColor(tinycolor.fromRatio(hsv).toHexString());
       setIcon(faStar);
     } else {
-      dispatch(addFavouriteColor(tinycolor.fromRatio(hsv).toHexString()));
+      addColor(tinycolor.fromRatio(hsv).toHexString());
       setIcon(fullstar);
     }
   };

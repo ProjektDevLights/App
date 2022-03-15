@@ -1,10 +1,8 @@
-import { isEqual } from "lodash";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import { StyleProp, StyleSheet, TextStyle } from "react-native";
 import { Button, Dialog, Portal, RadioButton } from "react-native-paper";
-import { useSelector } from "react-redux";
 import { Theme } from "../../interfaces/types";
-import { Store } from "../../store";
 import { useThemeChange } from "./ThemeProvider";
 
 export interface ThemeDialogProps {
@@ -14,11 +12,7 @@ export interface ThemeDialogProps {
 
 export default function ThemeDialog(props: ThemeDialogProps): JSX.Element {
   const { visible } = props;
-  const theme = useSelector(
-    (state: Store) => state.theme,
-    (l: Theme, r: Theme) => isEqual(l, r),
-  );
-  const [value, setValue] = React.useState<Theme>(theme);
+  const [value, setValue] = React.useState<Theme>("Dark");
   const changeTheme = useThemeChange();
 
   const onConfirm = async () => {
@@ -28,8 +22,17 @@ export default function ThemeDialog(props: ThemeDialogProps): JSX.Element {
 
   const onDismiss = async () => {
     props.onDismiss();
-    setValue(theme);
+    fetch();
   };
+
+  const fetch = async () => {
+    const type = await AsyncStorage.getItem("themeType");
+    setValue(type);
+  };
+
+  React.useEffect(() => {
+    fetch();
+  }, []);
 
   const styles = StyleSheet.create({
     radioItem: {

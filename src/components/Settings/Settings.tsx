@@ -1,22 +1,15 @@
 import { faAdjust } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { isEqual } from "lodash";
 import * as React from "react";
 import { ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { List, Title, useTheme } from "react-native-paper";
-import { useSelector } from "react-redux";
-import { Theme } from "../../interfaces/types";
-import { Store } from "../../store";
 import HostSettings from "../HostSettings";
-import ThemeDialog from "../ThemeDialog";
+import ThemeDialog, { useThemeChange } from "../ThemeDialog";
 
 export default function Settings(): JSX.Element {
   const theme = useTheme();
   const [visible, setVisible] = React.useState<boolean>(false);
-  const themeType = useSelector(
-    (state: Store) => state.theme,
-    (left: Theme, right: Theme) => isEqual(left, right),
-  );
+  const themeType = useThemeChange().type;
   const styles = StyleSheet.create({
     container: { width: "100%", height: "100%" },
     title: {

@@ -8,10 +8,8 @@ import * as React from "react";
 import { Dimensions, StyleSheet, TextInput, View } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { Button, Chip, IconButton, useTheme } from "react-native-paper";
-import { useSelector } from "react-redux";
+import { useAlarms } from "../../hooks/useAlarms";
 import useSnackbar from "../../hooks/useSnackbar";
-import { Store } from "../../store";
-import { checkAlarmEquality } from "../../utils";
 import ApplyDialog from "../ApplyDialog";
 import DayChip from "../DayChip";
 
@@ -21,10 +19,15 @@ export interface AlarmCardProps {
 
 export default function AlarmCard(props: AlarmCardProps): JSX.Element {
   const { id } = props;
-  const alarm = useSelector(
-    (state: Store) => state.alarms.find((a: Alarm) => a.id === id) as Alarm,
-    (l: Alarm, r: Alarm) => checkAlarmEquality(l, r),
-  );
+  const { alarms, updateAlarm } = useAlarms();
+  const alarm = alarms.find((a: Alarm) => a.id === id) ?? {
+    days: [],
+    time: "00:00",
+    id: "",
+    isOn: false,
+    leds: { pattern: "plain", colors: ["#000"] },
+    lights: [],
+  };
   const [days, setDays] = React.useState<number[]>(alarm.days);
   const modalizeRef = React.useRef<Modalize>(null);
   const navigation = useNavigation();
@@ -44,9 +47,10 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
    */
   const handleEdit = async (data: any, key: string): Promise<boolean> => {
     try {
-      await axios.patch(`/alarm/${alarm.id}`, {
+      updateAlarm({ ...alarm, [key]: data });
+      /*  await axios.patch(`/alarm/${alarm.id}`, {
         [key]: data,
-      });
+      }); */
       return true;
     } catch {
       return false;
@@ -80,12 +84,12 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
     if (!(await handleEdit(wDays, "days"))) setDays(old);
   };
 
-  const handleColorChange = () => {
+  /*   const handleColorChange = () => {
     navigation.navigate("color_modal", {
       color: alarm.color,
       onSubmit,
     });
-  };
+  }; */
 
   const styles = StyleSheet.create({
     root: {
@@ -245,7 +249,7 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
           color={alarm.color}
           style={styles.button}
           mode="contained"
-          onPress={handleColorChange}
+          //onPress={handleColorChange}
         >
           {alarm.color}
         </Button>

@@ -1,5 +1,5 @@
-import { isEqual } from "lodash";
 import { Alarm, Leds, Light } from "@devlights/types";
+import { isEqual } from "lodash";
 import { Gradient } from "./store/types/favouriteGradients";
 
 export const lightEquality = (l: Light, r: Light): boolean => {

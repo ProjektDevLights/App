@@ -1,15 +1,14 @@
 import { Light } from "@devlights/types";
 import axios, { AxiosError } from "axios";
-import { filter, isEqual, map, mean, some } from "lodash";
+import { map, mean, some } from "lodash";
 import * as React from "react";
 import { StyleSheet } from "react-native";
 import { useTheme } from "react-native-paper";
 // @ts-ignore
 import Slider from "react-native-slider";
-import { useSelector } from "react-redux";
 import tinycolor from "tinycolor2";
+import { useLights } from "../../hooks/useLights";
 import useSnackbar from "../../hooks/useSnackbar";
-import { Store } from "../../store";
 
 export interface SliderProps {
   color: string;
@@ -19,15 +18,10 @@ export interface SliderProps {
 export default function BrightnessSlider(props: SliderProps): JSX.Element {
   const { ids } = props;
   const snackbar = useSnackbar();
-  const light: Light = useSelector(
-    (state: Store) => state.lights.find((l: Light) => l.id === ids[0]) as Light,
-    (left: Light, right: Light) => isEqual(left, right),
-  );
+  const light = useLights().lights.find((l) => l.id === ids[0]);
 
-  const realLights: Light[] = useSelector(
-    (state: Store) =>
-      filter(state.lights, (l: Light) => ids.includes(l.id)) as Light[],
-    (left: Light[], right: Light[]) => isEqual(left, right),
+  const realLights: Light[] = useLights().lights.filter((l) =>
+    ids.includes(l.id),
   );
 
   const getBrightness = (): number => {

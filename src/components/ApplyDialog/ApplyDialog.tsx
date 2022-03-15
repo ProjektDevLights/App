@@ -1,18 +1,17 @@
+import { Light } from "@devlights/types";
 import * as React from "react";
 import { StyleSheet } from "react-native";
 import { Modalize } from "react-native-modalize";
 import {
   Button,
+  List,
   Portal,
+  RadioButton,
   Title,
   useTheme,
-  RadioButton,
-  List,
 } from "react-native-paper";
-import { useSelector } from "react-redux";
-import { Light } from "@devlights/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Store } from "../../store";
+import { useLights } from "../../hooks/useLights";
 
 interface ApplyDialogProps {
   title: string;
@@ -24,7 +23,7 @@ interface ApplyDialogProps {
 
 export const ApplyDialog = React.forwardRef(
   (props: ApplyDialogProps, ref: React.ForwardedRef<Modalize>) => {
-    const lights = useSelector((state: Store) => state.lights);
+    const { lights } = useLights();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
     const { title, confirmText, ids, ignoreLightOff } = props;

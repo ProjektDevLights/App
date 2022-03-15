@@ -1,15 +1,11 @@
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import axios, { AxiosResponse } from "axios";
 import Lottie from "lottie-react-native";
 import React from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { Text, Title } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useTags } from "../../hooks/useTags";
 import { TagsStackParamList } from "../../interfaces/types";
-import { Store } from "../../store";
-import { setTags } from "../../store/actions/tags";
-import { tagArrayEquality } from "../../utils";
 import TagCard from "../TagCard";
 
 export type HomeScreenNavigationProp = StackNavigationProp<
@@ -19,17 +15,12 @@ export type HomeScreenNavigationProp = StackNavigationProp<
 export type HomeScreenRouteProp = RouteProp<TagsStackParamList, "home">;
 
 function Tags(): JSX.Element {
-  const dispatch = useDispatch();
-  const tags = useSelector(
-    (state: Store) => state.tags,
-    (l: string[], r: string[]) => tagArrayEquality(l, r),
-  );
+  const { fetch: fetchTags, tags } = useTags();
   const [refresh, setRefresh] = React.useState<boolean>(false);
 
   const fetch = (refreshing = false) => {
     if (refreshing) setRefresh(true);
-    axios.get("/tags").then((res: AxiosResponse) => {
-      dispatch(setTags(res.data.object));
+    fetchTags().then(() => {
       if (refreshing) setRefresh(false);
     });
   };

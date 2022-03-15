@@ -1,6 +1,5 @@
 import { Alarm } from "@devlights/types";
 import axios from "axios";
-import { isEqual } from "lodash";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import {
@@ -10,8 +9,7 @@ import {
   TouchableRipple,
   useTheme,
 } from "react-native-paper";
-import { useSelector } from "react-redux";
-import { Store } from "../../store";
+import { useAlarms } from "../../hooks/useAlarms";
 import TimePicker from "../TimePicker";
 
 export default function AlarmHeader(props: {
@@ -20,10 +18,15 @@ export default function AlarmHeader(props: {
 }): JSX.Element {
   const { id, index } = props;
   const theme = useTheme();
-  const alarm = useSelector(
-    (state: Store) => state.alarms.find((a: Alarm) => a.id === id) as Alarm,
-    (l: Alarm, r: Alarm) => isEqual(l.isOn, r.isOn) && isEqual(l.time, r.time),
-  );
+  const { alarms } = useAlarms();
+  const alarm = alarms.find((a: Alarm) => a.id === id) ?? {
+    days: [],
+    time: "00:00",
+    id: "",
+    isOn: false,
+    leds: { pattern: "plain", colors: ["#000"] },
+    lights: [],
+  };
   const [isOn, setIsOn] = React.useState<boolean>(alarm.isOn);
   const [visible, setVisible] = React.useState<boolean>(false);
 

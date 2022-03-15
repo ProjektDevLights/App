@@ -1,17 +1,13 @@
-import { Alarm, Light, Response } from "@devlights/types";
+import { Light, Response } from "@devlights/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
 import * as SplashScreen from "expo-splash-screen";
-import { isEqual, orderBy, sortBy } from "lodash";
+import { orderBy } from "lodash";
 import Lottie from "lottie-react-native";
-import allSettled from "promise.allsettled";
 import * as React from "react";
 import {
   Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   RefreshControl,
-  ScrollView,
   StatusBar,
   StyleSheet,
   View,
@@ -21,29 +17,11 @@ import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist";
 import { ActivityIndicator, Text, Title, useTheme } from "react-native-paper";
-import { useSelector, useStore } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { useHost } from "../../hooks/useHost";
+import { useLights } from "../../hooks/useLights";
 import useNetwork from "../../hooks/useNetwork";
-import { LightResponse, Theme } from "../../interfaces/types";
-import { Store } from "../../store";
-import {
-  addAlarm,
-  editAlarm,
-  removeAlarm,
-  setAlarms,
-} from "../../store/actions/alarms";
-import {
-  setFavouriteColors,
-  setFavouriteGradients,
-} from "../../store/actions/favourites";
-import {
-  removeLight,
-  setAllLights,
-  setLight,
-} from "../../store/actions/lights";
-import { setTags } from "../../store/actions/tags";
-import { lightsEquality } from "../../utils";
+import { Theme } from "../../interfaces/types";
 import LightCard from "../LightCard";
 import { useThemeChange } from "../ThemeDialog";
 
@@ -82,12 +60,8 @@ export function Spinner(props: SpinnerProps): JSX.Element {
 
 export default function Home(): JSX.Element {
   const theme = useTheme();
-  const store = useStore();
   const host = useHost();
-  const lights: Light[] = useSelector(
-    (state: Store) => state.lights,
-    (l: Light[], r: Light[]) => lightsEquality(l, r),
-  );
+  const { lights, updateLights } = useLights();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
   const [error, setError] = React.useState<boolean>(false);
@@ -105,7 +79,7 @@ export default function Home(): JSX.Element {
   const sortLights = (pLights: Light[]) => {
     const orderLights = orderBy(pLights, ["position"], ["asc"]);
 
-    store.dispatch(setAllLights(orderLights));
+    // updateLights(orderLights);
   };
 
   React.useEffect(() => {
@@ -117,101 +91,16 @@ export default function Home(): JSX.Element {
 
     const s = io(socketHost);
 
-    setSocket(s);
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    listen();
-  };
-
-  const listen = () => {
-    socket?.on("light_change", (light: Light) => {
-      store.dispatch(setLight(light.id, light));
-    });
-    socket?.on("light_add", (light: Light) => {
-      store.dispatch(setLight(light.id, light));
-    });
-    socket?.on("light_remove", (light: Light) => {
-      store.dispatch(removeLight(light.id));
-    });
-    socket?.on("light_change_multiple", (pLights: Light[]) => {
-      pLights.forEach((light: Light) => {
-        store.dispatch(setLight(light.id, light));
-      });
-    });
-    socket?.on("alarm_change", (alarm: Alarm) => {
-      store.dispatch(editAlarm(alarm));
-    });
-    socket?.on("alarm_add", (alarm: Alarm) => {
-      store.dispatch(addAlarm(alarm));
-    });
-    socket?.on("alarm_remove", (alarm: Alarm) => {
-      store.dispatch(removeAlarm(alarm));
-    });
+    global.socket = s;
   };
 
   const fetch = async (pRefresh = false) => {
     if (pRefresh) setRefreshing(true);
-    setLoading(true);
+    //setLoading(true);
     setError(false);
-    const fetching = fetchTheme();
+    await fetchTheme();
 
-    const lightPromise: AxiosPromise<Light[]> = axios.get("/lights");
-    const alarmPromise: AxiosPromise<Alarm[]> = axios.get("/alarm");
-    const tagsPromise: AxiosPromise<string[]> = axios.get("/tags");
-    const promises: Promise<AxiosResponse<LightResponse> | unknown>[] = [];
-    promises.push(fetching);
-    if (network) {
-      promises.push(lightPromise);
-      promises.push(tagsPromise);
-      promises.push(alarmPromise);
-    }
-    // TODO Type val
-    allSettled(promises).then((val: any[]) => {
-      try {
-        if (val[1]) {
-          sortLights(val[1].value.data.object);
-        } else {
-          store.dispatch(setAllLights([]));
-          setError(true);
-        }
-        if (val[2]) {
-          store.dispatch(setTags(val[2].value.data.object));
-        } else {
-          store.dispatch(setTags([]));
-        }
-        if (val[3]) {
-          store.dispatch(setAlarms(val[3].value.data.object));
-        } else {
-          store.dispatch(setAlarms([]));
-        }
-        setLoading(false);
-        if (refreshing) setRefreshing(false);
-        if (socket === null || socket?.connected === false) {
-          joinSocket();
-        }
-      } catch {
-        if (refreshing) setRefreshing(false);
-        setLoading(false);
-        setError(true);
-      }
-      SplashScreen.hideAsync();
-    });
-
-    const favouriteColors: string | null = await AsyncStorage.getItem(
-      "favouriteColors",
-    );
-    const favouriteGradients: string | null = await AsyncStorage.getItem(
-      "favouriteGradients",
-    );
-    if (favouriteColors != null) {
-      store.dispatch(
-        setFavouriteColors(Array.from(JSON.parse(favouriteColors))),
-      );
-    }
-    if (favouriteGradients != null) {
-      store.dispatch(
-        setFavouriteGradients(Array.from(JSON.parse(favouriteGradients))),
-      );
-    }
+    SplashScreen.hideAsync();
   };
 
   const updatePos = (params: DragEndParams<Light>) => {

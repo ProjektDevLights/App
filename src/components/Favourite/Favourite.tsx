@@ -14,17 +14,10 @@ import {
 } from "react-native";
 import { Modalize } from "react-native-modalize";
 import { Divider, List, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useFavourites } from "../../hooks/useFavourites";
 import useSnackbar from "../../hooks/useSnackbar";
-import { LightsStackParamList, LightResponse } from "../../interfaces/types";
-import { Store } from "../../store";
-import {
-  removeFavouriteColor,
-  removeFavouriteGradient,
-} from "../../store/actions/favourites";
-import { setLight } from "../../store/actions/lights";
+import { LightResponse, LightsStackParamList } from "../../interfaces/types";
 import { Gradient } from "../../store/types/favouriteGradients";
-import { favouriteGradientsEquality, favouritesEquality } from "../../utils";
 import { ApplyDialog } from "../ApplyDialog/ApplyDialog";
 import Circle from "../Circle";
 
@@ -98,16 +91,8 @@ export type FavouriteScreenRouteProp = RouteProp<
 >;
 
 export default function Favourite(): JSX.Element {
-  const colors: string[] = useSelector(
-    (state: Store) => state.favouriteColors,
-    favouritesEquality,
-  );
-  const gradients: Gradient[] = useSelector(
-    (state: Store) => state.favouriteGradients,
-    favouriteGradientsEquality,
-  );
+  const { colors, gradients, removeColor, removeGradient } = useFavourites();
   const theme = useTheme();
-  const dispatch = useDispatch();
   const styles = StyleSheet.create({
     container: { alignSelf: "center", alignItems: "center", marginTop: 10 },
     text: {
@@ -149,7 +134,7 @@ export default function Favourite(): JSX.Element {
           return (
             <Color
               key={g.start + g.end}
-              delete={() => dispatch(removeFavouriteGradient(g))}
+              delete={() => removeGradient(g)}
               colors={array}
             />
           );
@@ -165,11 +150,7 @@ export default function Favourite(): JSX.Element {
         <View style={{ marginTop: theme.spacing(4) }}>
           <Text style={styles.text}>Colors</Text>
           {colors.map((fav: string) => (
-            <Color
-              key={fav}
-              delete={() => dispatch(removeFavouriteColor(fav))}
-              colors={[fav]}
-            />
+            <Color key={fav} delete={() => removeColor(fav)} colors={[fav]} />
           ))}
         </View>
         <Divider />
@@ -187,11 +168,7 @@ export default function Favourite(): JSX.Element {
     <ScrollView>
       <Text style={styles.text}> Colors</Text>
       {colors.map((fav: string) => (
-        <Color
-          key={fav}
-          delete={() => dispatch(removeFavouriteColor(fav))}
-          colors={[fav]}
-        />
+        <Color key={fav} delete={() => removeColor(fav)} colors={[fav]} />
       ))}
       <Divider />
       <Text style={styles.text}>Gradients</Text>
@@ -200,7 +177,7 @@ export default function Favourite(): JSX.Element {
         return (
           <Color
             key={g.start + g.end}
-            delete={() => dispatch(removeFavouriteGradient(g))}
+            delete={() => removeGradient(g)}
             colors={array}
           />
         );

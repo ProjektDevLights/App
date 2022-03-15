@@ -12,11 +12,8 @@ import {
 } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { Text, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import { Store } from "../../store";
-import { setLight } from "../../store/actions/lights";
-import { removeTag } from "../../store/actions/tags";
-import { isOnEquality } from "../../utils";
+import { useLights } from "../../hooks/useLights";
+import { useTags } from "../../hooks/useTags";
 import Powerbulb from "../Powerbulb";
 import { TagScreenNavigationProp } from "../TagScreen/TagScreen";
 import getContrastTextColor from "../textContrast";
@@ -28,11 +25,9 @@ interface TagCardProps {
 export default function TagCard(props: TagCardProps): JSX.Element {
   const { tag } = props;
   const swipeableRef = React.useRef<Swipeable>(null);
-  const lights = useSelector(
-    (state: Store) => state.lights.filter((l: Light) => l.tags?.includes(tag)),
-    (l: Light[], r: Light[]) => isOnEquality(l, r),
-  );
-  const dispatch = useDispatch();
+  const lights = useLights().lights.filter((l: Light) => l.tags?.includes(tag));
+
+  const tags = useTags();
   const navigation = useNavigation<TagScreenNavigationProp>();
   const theme = useTheme();
   const styles = StyleSheet.create({
@@ -68,14 +63,12 @@ export default function TagCard(props: TagCardProps): JSX.Element {
   });
 
   const deleteTag = async () => {
-    await lights.forEach(
-      async (l: Light): Promise<void> => {
-        await axios.delete(`/lights/${l.id}/tags`, {
-          data: { tags: [tag] },
-        });
-      },
-    );
-    dispatch(removeTag(tag));
+    await lights.forEach(async (l: Light): Promise<void> => {
+      await axios.delete(`/lights/${l.id}/tags`, {
+        data: { tags: [tag] },
+      });
+    });
+    tags.fetch();
   };
 
   const renderLeftAction = (

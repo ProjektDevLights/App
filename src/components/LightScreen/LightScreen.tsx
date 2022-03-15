@@ -11,12 +11,10 @@ import {
   View,
 } from "react-native";
 import { Divider, Text, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useLights } from "../../hooks/useLights";
+import { useLight } from "../../hooks/useLights/LightProvider";
 import useSnackbar from "../../hooks/useSnackbar";
 import { LightResponse, LightsStackParamList } from "../../interfaces/types";
-import { Store } from "../../store";
-import { setLight } from "../../store/actions/lights";
-import { lightEquality } from "../../utils";
 import BrightnessSlider from "../BrightnessSlider";
 import CountComponent from "../CountComponent";
 import LightControl from "../LightControl";
@@ -39,11 +37,8 @@ export default function LightScreen(): JSX.Element {
   const theme = useTheme();
   const snackbar = useSnackbar();
   const { colors } = theme;
-  const dispatch = useDispatch();
-  const light = useSelector(
-    (state: Store) => state.lights.find((l: Light) => l.id === id) as Light,
-    (l: Light, r: Light) => lightEquality(l, r),
-  );
+  const light = useLight();
+  const lights = useLights();
 
   const navigation = useNavigation();
 
@@ -91,7 +86,7 @@ export default function LightScreen(): JSX.Element {
   const fetch = async () => {
     setRefresh(true);
     const res: LightResponse = await axios.get(`/lights/${id}`);
-    dispatch(setLight(light.id, res.data.object));
+    lights.updateLight(res.data.object);
 
     setRefresh(false);
   };
@@ -121,12 +116,7 @@ export default function LightScreen(): JSX.Element {
         success = false;
       });
     } else {
-      dispatch(
-        setLight(light.id, {
-          ...light,
-          leds: { colors: light.leds.colors, pattern: "custom" },
-        }),
-      );
+      light.leds.pattern = "custom";
       setOldPattern(light.leds.pattern);
     }
     return success ? newPattern : light.leds.pattern;
@@ -135,24 +125,16 @@ export default function LightScreen(): JSX.Element {
   const changeColor = async (
     pColors: string[],
     timeout: number | undefined,
-  ): Promise<AxiosResponse<Light>> => {
+  ): Promise<AxiosResponse<LightResponse> | void> => {
     if (light.leds.pattern === "custom") {
       setOldPattern("custom");
-      return;
+      return new Promise<void>(() => {});
     }
-    const ax = axios.patch(`/lights/${id}/color`, {
-      colors: ["fading", "rainbow"].includes(light.leds.pattern) ? [] : pColors,
-      pattern: light.leds.pattern,
-      timeout: timeout ?? light.leds.timeout,
-    });
-    ax.then((res: LightResponse) => {
-      snackbar.makeSnackbar(res.data.message, theme.colors.success);
-    }).catch((err: AxiosError) => {
-      snackbar.makeSnackbar(
-        err.response?.data.message ?? "Nothing changed!",
-        theme.colors.error,
-      );
-    });
+    const ax = light.updateColor(
+      light.leds.pattern,
+      ["fading", "rainbow"].includes(light.leds.pattern) ? [] : pColors,
+      timeout ?? light.leds.timeout,
+    );
     return ax;
   };
 
@@ -246,7 +228,7 @@ export default function LightScreen(): JSX.Element {
         <View style={styles.slider_container}>
           <Text style={styles.slider_text}> Brightness</Text>
           <BrightnessSlider
-            color={light?.leds.colors[0] ?? fallBacklight.leds.colors[0]}
+            color={light?.leds?.colors[0] ?? fallBacklight?.leds?.colors[0]}
             ids={[light?.id ?? fallBacklight.id]}
           />
         </View>

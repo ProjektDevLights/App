@@ -1,4 +1,3 @@
-import { isEqual } from "lodash";
 import React from "react";
 import {
   Pressable,
@@ -8,8 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { useTheme } from "react-native-paper";
-import { useSelector } from "react-redux";
-import { Store } from "../../store";
+import { useFavourites } from "../../hooks/useFavourites";
 import { Gradient } from "../../store/types/favouriteGradients";
 import Circle from "../Circle";
 
@@ -23,10 +21,7 @@ export default function FavouriteGradientList(
 ): JSX.Element {
   const { style } = props;
   const theme = useTheme();
-  const favouriteGradients = useSelector(
-    (state: Store) => state.favouriteGradients,
-    (l: Gradient[], r: Gradient[]) => isEqual(l, r),
-  );
+  const favouriteGradients = useFavourites().gradients;
 
   const styles = StyleSheet.create({
     container: StyleSheet.flatten([

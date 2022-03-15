@@ -1,12 +1,11 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as React from "react";
 import { Appearance } from "react-native";
 import { Provider } from "react-native-paper";
-import { useDispatch } from "react-redux";
 import { Theme } from "../../interfaces/types";
-import setTheme from "../../store/actions/theme";
 import {
-  lightTheme as lightFunction,
   darkTheme as darkFunction,
+  lightTheme as lightFunction,
 } from "../theme";
 
 export interface ThemeProviderProps {
@@ -14,6 +13,7 @@ export interface ThemeProviderProps {
 }
 
 export const ThemeContext = React.createContext<{
+  type: Theme;
   changeTheme(type: Theme): Promise<void>;
 }>({ changeTheme: () => new Promise<void>((): void => {}) });
 
@@ -25,9 +25,9 @@ export function useThemeChange(): React.ContextType<typeof ThemeContext> {
 
 export default function ThemeProvider(props: ThemeProviderProps): JSX.Element {
   const { children } = props;
+  const [type, setType] = React.useState<Theme>("Dark");
   const [theme, setStateTheme] = React.useState<ReactNativePaper.Theme>();
   const colorScheme = Appearance.getColorScheme();
-  const dispatch = useDispatch();
 
   const changeTheme = async (type: Theme) => {
     if (
@@ -37,7 +37,6 @@ export default function ThemeProvider(props: ThemeProviderProps): JSX.Element {
       await darkFunction().then((t) => {
         setStateTheme(t);
       });
-      dispatch(setTheme(type));
     } else if (
       type === "Light" ||
       (type === "System-Default" && colorScheme === "light")
@@ -45,12 +44,13 @@ export default function ThemeProvider(props: ThemeProviderProps): JSX.Element {
       await lightFunction().then((t) => {
         setStateTheme(t);
       });
-      dispatch(setTheme(type));
     }
+    setType(type);
+    AsyncStorage.setItem("themeType", type);
   };
 
   return (
-    <ThemeContext.Provider value={{ changeTheme }}>
+    <ThemeContext.Provider value={{ type, changeTheme }}>
       <Provider theme={theme}>{children}</Provider>
     </ThemeContext.Provider>
   );

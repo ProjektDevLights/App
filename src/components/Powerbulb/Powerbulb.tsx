@@ -7,10 +7,8 @@ import { map } from "lodash";
 import React from "react";
 import { PressableProps } from "react-native";
 import { useTheme } from "react-native-paper";
-import { useSelector } from "react-redux";
+import { useLights } from "../../hooks/useLights";
 import useSnackbar from "../../hooks/useSnackbar";
-import { Store } from "../../store";
-import { isOnEquality } from "../../utils";
 import Icon from "../Icon";
 
 interface PowerBulbProps extends PressableProps {
@@ -22,10 +20,8 @@ interface PowerBulbProps extends PressableProps {
 
 export default function PowerBulb(props: PowerBulbProps): JSX.Element {
   const { ids, onBulbPress, type, tag, ...rest } = props;
-  const lights = useSelector(
-    (state: Store) => state.lights.filter((l) => ids.includes(l.id)),
-    (l: Light[], r: Light[]) => isOnEquality(l, r),
-  );
+
+  const lights = useLights().lights.filter((l) => ids.includes(l.id));
   const snackbar = useSnackbar();
   const theme = useTheme();
 

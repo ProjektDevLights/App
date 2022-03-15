@@ -2,7 +2,6 @@
 import { CustomData, Light } from "@devlights/types";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { max, min } from "lodash";
 import * as React from "react";
 import {
   Animated,
@@ -195,20 +194,18 @@ export default function LightCard(props: CardProps): JSX.Element {
         ) : (
           <View style={styles.custom_container}>
             {
-              light.custom_sequence?.map((c: CustomData) => {
-                return (
-                  <View style={{ flex: c.repeat, flexDirection: "row" }}>
-                    {c.leds.map((col: string) => (
-                      <View
-                        style={{
-                          backgroundColor: light.isOn ? col : "#000",
-                          flex: c.repeat / c.leds.length,
-                        }}
-                      />
-                    ))}
-                  </View>
-                );
-              })
+              light.custom_sequence?.map((c: CustomData) => (
+                <View style={{ flex: c.repeat, flexDirection: "row" }}>
+                  {c.leds.map((col: string) => (
+                    <View
+                      style={{
+                        backgroundColor: light.isOn ? col : "#000",
+                        flex: c.repeat / c.leds.length,
+                      }}
+                    />
+                  ))}
+                </View>
+              ))
               // @ts-ignore
               /* getFlexAmounts(light.leds.colors.length).map(
                 (counts: number[]) => (

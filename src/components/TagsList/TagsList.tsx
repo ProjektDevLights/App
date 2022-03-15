@@ -4,14 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import axios, { AxiosError } from "axios";
 import React from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Divider, List, Text, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useLight } from "../../hooks/useLights/LightProvider";
 import useSnackbar from "../../hooks/useSnackbar";
+import { useTags } from "../../hooks/useTags";
 import { LightResponse } from "../../interfaces/types";
-import { Store } from "../../store";
-import { setLight } from "../../store/actions/lights";
-import { addTag as addTagsToStore } from "../../store/actions/tags";
 import ChangeableText from "../ChangeableText";
 import { TagScreenNavigationProp } from "../TagScreen/TagScreen";
 
@@ -22,11 +20,11 @@ export interface TagsListProps {
 }
 
 export default function TagsList(props: TagsListProps): JSX.Element {
-  const { enabled, light } = props;
+  const { enabled } = props;
   const theme = useTheme();
+  const light = useLight();
   const snackbar = useSnackbar();
-  const tags = useSelector((state: Store) => state.tags);
-  const dispatch = useDispatch();
+  const { tags, fetch: fetchTags } = useTags();
 
   const addTag = async (tag: string) => {
     const index = tags.findIndex(
@@ -36,8 +34,7 @@ export default function TagsList(props: TagsListProps): JSX.Element {
       tags: [index >= 0 ? tags[index] : tag],
     });
     ax.then((res: LightResponse) => {
-      dispatch(addTagsToStore(tag));
-
+      fetchTags();
       snackbar.makeSnackbar(
         res.data.message,
         res.status === 200 ? theme.colors.success : theme.colors.error,

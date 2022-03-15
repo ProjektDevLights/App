@@ -6,13 +6,10 @@ import { every, map } from "lodash";
 import React from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import { Divider, Text, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useLights } from "../../hooks/useLights";
 import useSnackbar from "../../hooks/useSnackbar";
+import { useTags } from "../../hooks/useTags";
 import { TagsStackParamList } from "../../interfaces/types";
-import { Store } from "../../store";
-import { setLight } from "../../store/actions/lights";
-import { removeTag } from "../../store/actions/tags";
-import { tagsEquality } from "../../utils";
 import BrightnessSlider from "../BrightnessSlider";
 import LightControl from "../LightControl";
 import PatternComponent from "../PatternComponent";
@@ -39,21 +36,14 @@ export default function TagScreen(): JSX.Element {
     pattern: "unkown",
     timeout: undefined,
   });
-  const dispatch = useDispatch();
   const navigation = useNavigation();
   const theme = useTheme();
-  const tags = useSelector((state: Store) =>
-    state.tags.find((t: string) => t === tag),
-  );
-
-  const lights: Light[] = useSelector(
-    (state: Store) => state.lights.filter((l) => l.tags?.includes(tag)),
-    (l: Light[], r: Light[]) => tagsEquality(l, r, l.length, tag),
-  );
+  const { tags, fetch: fetchTags } = useTags();
+  const lights = useLights().lights.filter((l: Light) => l.tags?.includes(tag));
 
   React.useEffect(() => {
     if (!lights || lights?.length < 1) {
-      dispatch(removeTag(params.tag));
+      fetchTags();
       navigation.goBack();
       snackbar.makeSnackbar(
         "Tag does not exist anymore in this application!",

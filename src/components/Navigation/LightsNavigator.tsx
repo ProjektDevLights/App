@@ -11,13 +11,14 @@ import {
 } from "@react-navigation/stack";
 import React from "react";
 import { useTheme } from "react-native-paper";
+import LightProvider from "../../hooks/useLights/LightProvider";
 import { LightsStackParamList } from "../../interfaces/types";
 import ColorPicker from "../ColorPicker";
+import CustomScreen from "../CustomScreen";
 import Favourite from "../Favourite";
 import Home from "../Home";
 import Icon from "../Icon";
-import LightScreens from "../LightScreen";
-import CustomScreen from "../CustomScreen";
+import LightScreen from "../LightScreen";
 
 export default function LightsNavigator(): JSX.Element {
   const Stack = createStackNavigator<LightsStackParamList>();
@@ -62,7 +63,16 @@ export default function LightsNavigator(): JSX.Element {
           gestureResponseDistance: { vertical: 200 },
           ...TransitionPresets.SlideFromRightIOS,
         })}
-        component={LightScreens}
+        // @ts-ignore
+        // eslint-disable-next-line react/no-children-prop
+        children={({ route }) => {
+          const { id } = route.params;
+          return (
+            <LightProvider id={id}>
+              <LightScreen />
+            </LightProvider>
+          );
+        }}
       />
       <Stack.Screen
         name="color_modal"

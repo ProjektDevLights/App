@@ -1,6 +1,7 @@
 {
   "main": "index.js",
   "license": "",
+  "typings": "src/interfaces",
   "scripts": {
     "android": "./android.sh",
     "ios": "react-native run-ios",
@@ -57,14 +58,12 @@
     "react-native-unimodules": "^0.11.0",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
-    "react-redux": "^7.2.5",
-    "redux": "^4.1.1",
     "socket.io-client": "^4.2.0",
     "tinycolor2": "^1.4.2"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
-    "@devlights/types": "^0.0.13",
+    "@devlights/types": "^0.0.14",
     "@react-native-community/eslint-config": "^2.0.0",
     "@types/lodash": "^4.14.175",
     "@types/node": "^14.17.19",

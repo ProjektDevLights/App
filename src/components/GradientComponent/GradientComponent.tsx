@@ -15,12 +15,7 @@ import {
   View,
 } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import { Store } from "../../store";
-import {
-  addFavouriteGradient,
-  removeFavouriteGradient,
-} from "../../store/actions/favourites";
+import { useFavourites } from "../../hooks/useFavourites";
 import { Gradient } from "../../store/types/favouriteGradients";
 import { isFavouriteGradient, makeValidColorArray } from "../../utils";
 import { ColorModalScreenNavigationProp } from "../ColorPicker/ColorPicker";
@@ -37,11 +32,12 @@ export default function GradientComponent(
 ): JSX.Element {
   const { colors, disabled } = props;
   const navigation = useNavigation<ColorModalScreenNavigationProp>();
-  const favouriteGradients: Gradient[] = useSelector(
-    (state: Store) => state.favouriteGradients,
-  );
+  const {
+    gradients: favouriteGradients,
+    removeGradient,
+    addGradient,
+  } = useFavourites();
   const [icon, setIcon] = React.useState<IconProp>(faStar);
-  const dispatch = useDispatch();
   const theme = useTheme();
 
   const onSubmit = async (newColor: string, index?: number) => {
@@ -68,10 +64,10 @@ export default function GradientComponent(
       end: colors[1],
     };
     if (isFavouriteGradient(favouriteGradients, gradient)) {
-      dispatch(removeFavouriteGradient(gradient));
+      removeGradient(gradient);
       setIcon(faStar);
     } else {
-      dispatch(addFavouriteGradient(gradient));
+      addGradient(gradient);
       setIcon(fullstar);
     }
   };

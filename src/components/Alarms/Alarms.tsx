@@ -1,6 +1,5 @@
-import { Alarm, Response } from "@devlights/types";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { indexOf, isEqual, map } from "lodash";
+import { indexOf, map } from "lodash";
 import moment from "moment";
 import React from "react";
 import {
@@ -18,11 +17,9 @@ import {
   TouchableRipple,
   useTheme,
 } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import { useAlarms } from "../../hooks/useAlarms";
 import useNetwork from "../../hooks/useNetwork";
 import useSnackbar from "../../hooks/useSnackbar";
-import { Store } from "../../store";
-import { addAlarm, setAlarms } from "../../store/actions/alarms";
 import AlarmCard from "../AlarmCard/AlarmCard";
 import AlarmFooter from "../AlarmFooter";
 import AlarmHeader from "../AlarmHeader";
@@ -30,13 +27,8 @@ import ApplyDialog from "../ApplyDialog";
 import TimePicker from "../TimePicker";
 
 export default function Alarms(): JSX.Element {
-  const alarms: Alarm[] =
-    useSelector(
-      (state: Store) => state.alarms,
-      (l: Alarm[], r: Alarm[]) => isEqual(l, r),
-    ) || [];
+  const { alarms } = useAlarms();
   const [avaible, setAvaible] = React.useState<boolean>(true);
-  const dispatch = useDispatch();
   const network = useNetwork();
   const modalizeRef = React.useRef<Modalize>(null);
   const [activeSections, setActiveSections] = React.useState<number[]>([]);
@@ -97,11 +89,6 @@ export default function Alarms(): JSX.Element {
 
   const fetchAlarms = async () => {
     await getavailable();
-    if (avaible) {
-      axios.get("/alarm").then((res: AxiosResponse) => {
-        dispatch(setAlarms(res.data.object));
-      });
-    }
   };
 
   const handleAlarmCreation = (ids: string[]) => {
