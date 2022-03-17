@@ -22,6 +22,8 @@ export default function App(): JSX.Element {
   const styles = StyleSheet.create({
     root: { backgroundColor: "#000", height: "100%", width: "100%" },
   });
+  const isHermes = () => !!global.HermesInternal;
+  console.log(isHermes());
   return (
     <View style={styles.root}>
       <HostProvider>

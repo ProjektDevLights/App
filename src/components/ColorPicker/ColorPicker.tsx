@@ -6,13 +6,12 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-// @ts-ignore
-import HsvColorPicker from "react-native-hsv-color-picker";
 import { Button, Text, useTheme } from "react-native-paper";
-import tinycolor, { ColorFormats } from "tinycolor2";
+import WheelColorPicker from "react-native-wheel-color-picker";
+import tinycolor from "tinycolor2";
 import { useFavourites } from "../../hooks/useFavourites";
 import { LightsStackParamList } from "../../interfaces/types";
-import FavouriteList from "../FavouriteList/FavouriteList";
+import FavouriteList from "../FavouriteList";
 
 export type ColorModalScreenNavigationProp = StackNavigationProp<
   LightsStackParamList,
@@ -26,22 +25,24 @@ export type ColorModalScreenRouteProp = RouteProp<
 
 export default function ColorPicker(): JSX.Element {
   const route = useRoute<ColorModalScreenRouteProp>();
-  const { color } = route.params;
+  const ref = React.useRef<WheelColorPicker>(null);
+  const { color: currentColor } = route.params;
   const navigation = useNavigation();
   const theme = useTheme();
   const { colors: favouriteColors, removeColor, addColor } = useFavourites();
-  const [hsv, setHsv] = React.useState<ColorFormats.HSV>(
+  /* const [hsv, setHsv] = React.useState<ColorFormats.HSV>(
     tinycolor(color ?? "#fff").toHsv(),
-  );
+  ); */
+  const [color, setColor] = React.useState(currentColor ?? "#fff");
   const [icon, setIcon] = React.useState<IconProp>(faStar);
 
   const { colors } = theme;
   const saveColor = () => {
-    if (favouriteColors.includes(tinycolor.fromRatio(hsv).toHexString())) {
-      removeColor(tinycolor.fromRatio(hsv).toHexString());
+    if (favouriteColors.includes(tinycolor.fromRatio(color).toHexString())) {
+      removeColor(tinycolor.fromRatio(color).toHexString());
       setIcon(faStar);
     } else {
-      addColor(tinycolor.fromRatio(hsv).toHexString());
+      addColor(tinycolor.fromRatio(color).toHexString());
       setIcon(fullstar);
     }
   };
@@ -53,8 +54,13 @@ export default function ColorPicker(): JSX.Element {
       alignItems: "center",
       justifyContent: "center",
     },
-    button: { marginTop: 20 },
-    icon: { marginRight: 20 },
+    colorWheelContainer: { alignSelf: "center", height: "50%", width: "70%" },
+    button: {
+      marginTop: 20,
+    },
+    icon: {
+      marginRight: 20,
+    },
   });
 
   React.useEffect(() => {
@@ -68,72 +74,58 @@ export default function ColorPicker(): JSX.Element {
   }, [icon]);
 
   React.useEffect(() => {
-    if (favouriteColors.includes(tinycolor.fromRatio(hsv).toHexString())) {
+    if (favouriteColors.includes(tinycolor.fromRatio(color).toHexString())) {
       setIcon(fullstar);
     } else {
       setIcon(faStar);
     }
-  }, [hsv]);
-
-  const onSatValChange = ({
-    saturation,
-    value,
-  }: {
-    saturation: number;
-    value: number;
-  }) => {
-    setHsv({ ...hsv, s: saturation, v: value });
-  };
+  }, [color]);
 
   const onPress = (prop: string) => {
-    const { h, s, v } = tinycolor.fromRatio(prop).toHsv();
-    setHsv({ h, s, v });
+    const newColor = tinycolor.fromRatio(prop).toHexString();
+    setColor(newColor);
     if (icon === faStar) setIcon(fullstar);
   };
 
   const onSubmit = async () => {
     const success = await route.params.onSubmit(
-      tinycolor.fromRatio(hsv).toHexString(),
+      tinycolor.fromRatio(color).toHexString(),
       //@ts-ignore
       route.params.index,
     );
     if (success) {
       navigation.goBack();
     } else {
-      setHsv(tinycolor(color).toHsv());
+      setColor(tinycolor(currentColor).toHexString());
     }
   };
 
   return (
     <View style={styles.container}>
       <FavouriteList onPress={onPress} />
-      <HsvColorPicker
-        huePickerHue={hsv.h}
-        huePickerSliderSize={30}
-        satValPickerHue={hsv.h}
-        satValPickerSaturation={hsv.s}
-        satValPickerValue={hsv.v}
-        satValPickerSize={270}
-        satValPickerSliderSize={30}
-        onHuePickerDragMove={({ hue }: { hue: number }) =>
-          setHsv({ ...hsv, h: hue })
-        }
-        onHuePickerPress={({ hue }: { hue: number }) =>
-          setHsv({ ...hsv, h: hue })
-        }
-        onSatValPickerDragMove={onSatValChange}
-        onSatValPickerPress={onSatValChange}
-      />
-      <Text>
+      <View style={styles.colorWheelContainer}>
+        <WheelColorPicker
+          color={color}
+          onColorChangeComplete={(c) => setColor(c)}
+          ref={ref}
+          palette={favouriteColors}
+          thumbSize={40}
+          sliderSize={20}
+          noSnap
+          row={false}
+          swatches={false}
+        />
+      </View>
+      <Text style={styles.button}>
         Current color:
-        {tinycolor.fromRatio(hsv).toHexString()}
+        {tinycolor.fromRatio(color).toHexString()}
       </Text>
       <Button
-        disabled={tinycolor.fromRatio(hsv).toHexString() === color}
+        disabled={tinycolor.fromRatio(color).toHexString() === currentColor}
         style={styles.button}
         color={
-          tinycolor.fromRatio(hsv).toHexString() !== ""
-            ? tinycolor.fromRatio(hsv).toHexString()
+          tinycolor.fromRatio(color).toHexString() !== ""
+            ? tinycolor.fromRatio(color).toHexString()
             : color
         }
         onPress={onSubmit}

@@ -1,4 +1,8 @@
 package com.devlights;
+import android.content.res.Configuration;
+import expo.modules.ApplicationLifecycleDispatcher;
+import expo.modules.ReactNativeHostWrapper;
+import expo.modules.updates.UpdatesController;
 
 import android.app.Application;
 import android.content.Context;
@@ -16,17 +20,8 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.devlights.generated.BasePackageList;
-
-import org.unimodules.adapters.react.ReactAdapterPackage;
-import org.unimodules.adapters.react.ModuleRegistryAdapter;
-import org.unimodules.adapters.react.ReactModuleRegistryProvider;
-import org.unimodules.core.interfaces.Package;
-import org.unimodules.core.interfaces.SingletonModule;
-import expo.modules.constants.ConstantsPackage;
-import expo.modules.permissions.PermissionsPackage;
-import expo.modules.filesystem.FileSystemPackage;
-import expo.modules.updates.UpdatesController;
+import com.facebook.react.bridge.JSIModulePackage; 
+import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -34,11 +29,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public class MainApplication extends Application implements ReactApplication {
-  private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
+ /*  private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
     new BasePackageList().getPackageList()
   );
-
-  private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+ */
+  private final ReactNativeHost mReactNativeHost = new ReactNativeHostWrapper(this, new ReactNativeHost(this) {
     @Override
     public boolean getUseDeveloperSupport() {
       return BuildConfig.DEBUG;
@@ -47,7 +42,7 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = new PackageList(this).getPackages();
-      packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
+      //packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
       packages.add(new LottiePackage());
       //packages.add(new RNDateTimePickerPackage());
       return packages;
@@ -56,6 +51,11 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected String getJSMainModuleName() {
       return "index";
+    }
+
+    @Override      
+    protected JSIModulePackage getJSIModulePackage() {
+      return new ReanimatedJSIModulePackage(); 
     }
 
     @Override
@@ -75,7 +75,7 @@ public class MainApplication extends Application implements ReactApplication {
         return UpdatesController.getInstance().getBundleAssetName();
       }
     }
-  };
+  });
 
   @Override
   public ReactNativeHost getReactNativeHost() {
@@ -92,6 +92,7 @@ public class MainApplication extends Application implements ReactApplication {
     }
 
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    ApplicationLifecycleDispatcher.onApplicationCreate(this);
   }
 
   /**
@@ -123,5 +124,11 @@ public class MainApplication extends Application implements ReactApplication {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig);
   }
 }

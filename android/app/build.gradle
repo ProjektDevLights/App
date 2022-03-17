@@ -81,7 +81,6 @@ project.ext.react = [
     enableHermes: true
 ]
 
-apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/expo-updates/scripts/create-manifest-android.gradle"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
@@ -122,13 +121,14 @@ def jscFlavor = 'org.webkit:android-jsc:+'
  */
 def enableHermes = project.ext.react.get("enableHermes", false);
 
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+/**
+ * Architectures to build native code for in debug.
+ */
+def nativeArchitectures = project.getProperties().get("reactNativeDebugArchitectures")
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
         applicationId "com.devlights"
@@ -165,6 +165,11 @@ android {
         debug {
             manifestPlaceholders = [appName: "DevLights DEBUG"]
             signingConfig signingConfigs.debug
+            if (nativeArchitectures) {
+                ndk {
+                    abiFilters nativeArchitectures.split(',')
+                }
+            }
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
         }
@@ -210,7 +215,6 @@ dependencies {
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
     }
-    addUnimodulesDependencies()
      
 
     if (enableHermes) {
