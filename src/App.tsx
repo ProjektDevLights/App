@@ -3,7 +3,7 @@ import "intl";
 import "intl/locale-data/jsonp/en";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Navigation from "./components/Navigation/Navigation";
 import SafeAreaView from "./components/SafeAreaView";
@@ -22,29 +22,29 @@ export default function App(): JSX.Element {
   const styles = StyleSheet.create({
     root: { backgroundColor: "#000", height: "100%", width: "100%" },
   });
-  const isHermes = () => !!global.HermesInternal;
-  console.log(isHermes());
   return (
-    <View style={styles.root}>
-      <HostProvider>
-        <SafeAreaProvider>
-          <ThemeProvider>
-            <SnackbarProvider>
-              <LightsProvider>
-                <AlarmsProvider>
-                  <TagsProvider>
-                    <FavouritesProvider>
-                      <SafeAreaView>
-                        <Navigation />
-                      </SafeAreaView>
-                    </FavouritesProvider>
-                  </TagsProvider>
-                </AlarmsProvider>
-              </LightsProvider>
-            </SnackbarProvider>
-          </ThemeProvider>
-        </SafeAreaProvider>
-      </HostProvider>
-    </View>
+    <GestureHandlerRootView>
+      <View style={styles.root}>
+        <HostProvider>
+          <SafeAreaProvider>
+            <ThemeProvider>
+              <SnackbarProvider>
+                <LightsProvider>
+                  <AlarmsProvider>
+                    <TagsProvider>
+                      <FavouritesProvider>
+                        <SafeAreaView>
+                          <Navigation />
+                        </SafeAreaView>
+                      </FavouritesProvider>
+                    </TagsProvider>
+                  </AlarmsProvider>
+                </LightsProvider>
+              </SnackbarProvider>
+            </ThemeProvider>
+          </SafeAreaProvider>
+        </HostProvider>
+      </View>
+    </GestureHandlerRootView>
   );
 }

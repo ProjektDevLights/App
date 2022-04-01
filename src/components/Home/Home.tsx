@@ -1,8 +1,7 @@
 import { Light, Response } from "@devlights/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import * as SplashScreen from "expo-splash-screen";
-import { orderBy } from "lodash";
 import Lottie from "lottie-react-native";
 import * as React from "react";
 import {
@@ -61,7 +60,7 @@ export function Spinner(props: SpinnerProps): JSX.Element {
 export default function Home(): JSX.Element {
   const theme = useTheme();
   const host = useHost();
-  const { lights, updateLights } = useLights();
+  const { lights, updatePos } = useLights();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
   const [error, setError] = React.useState<boolean>(false);
@@ -75,16 +74,6 @@ export default function Home(): JSX.Element {
     await themeChange.changeTheme(type);
     return theme;
   };
-
-  const sortLights = (pLights: Light[]) => {
-    const orderLights = orderBy(pLights, ["position"], ["asc"]);
-
-    // updateLights(orderLights);
-  };
-
-  React.useEffect(() => {
-    sortLights(lights);
-  }, [lights]);
 
   const joinSocket = () => {
     const socketHost = `${`${host.getHostName()}:${host.getPort()}`}`;
@@ -101,16 +90,6 @@ export default function Home(): JSX.Element {
     await fetchTheme();
 
     SplashScreen.hideAsync();
-  };
-
-  const updatePos = (params: DragEndParams<Light>) => {
-    axios
-      .patch(`/lights/${lights[params.from].id}/position`, {
-        position: params.to,
-      })
-      .then((res: AxiosResponse<Response<Light[]>>) => {
-        sortLights(res.data.object);
-      });
   };
 
   React.useEffect(() => {

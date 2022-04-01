@@ -1,13 +1,15 @@
 import { Light, Response } from "@devlights/types";
 import axios, { AxiosResponse } from "axios";
-import { isEqual } from "lodash";
+import { isEqual, orderBy } from "lodash";
 import React from "react";
+import { DragEndParams } from "react-native-draggable-flatlist";
 
 export type LightsContextType = {
   lights: Light[];
   fetch: () => Promise<void>;
   updateLight: (l: Light) => void;
   updateLights: (l: Light[]) => void;
+  updatePos: (params: DragEndParams<Light>) => void;
 };
 
 export const LightsContext = React.createContext<LightsContextType>({
@@ -15,6 +17,7 @@ export const LightsContext = React.createContext<LightsContextType>({
   fetch: () => new Promise(() => {}),
   updateLight: (l: Light) => undefined,
   updateLights: (l: Light[]) => undefined,
+  updatePos: (params: DragEndParams<Light>) => undefined,
 });
 
 export interface LightsProviderProps {
@@ -25,16 +28,34 @@ function LightsProvider(props: LightsProviderProps): JSX.Element {
   const { children } = props;
   const [lights, setLights] = React.useState<Light[]>([]);
   const lightsRef = React.useRef(lights);
+
+  const sortLights = (pLights: Light[]): Light[] => {
+    const orderLights = orderBy(pLights, ["position"], ["asc"]);
+
+    return orderLights;
+  };
+
+  const updatePos = (params: DragEndParams<Light>) => {
+    axios
+      .patch(`/lights/${lights[params.from].id}/position`, {
+        position: params.to,
+      })
+      .then((res: AxiosResponse<Response<Light[]>>) => {
+        setLights(sortLights(res.data.object));
+      });
+  };
+
   const fetch = async () => {
     const res: AxiosResponse<Response<Light[]>> = await axios.get("/lights");
-    setLights(res.data.object);
+
+    setLights(sortLights(res.data.object));
   };
 
   const updateLight = (light: Light): void => {
     const index = lightsRef.current.findIndex((l: Light) => l.id === light.id);
     if (index > -1) {
       lightsRef.current[index] = light;
-      setLights([...lightsRef.current]);
+      setLights(sortLights([...lightsRef.current]));
     }
   };
 
@@ -82,7 +103,7 @@ function LightsProvider(props: LightsProviderProps): JSX.Element {
 
   return (
     <LightsContext.Provider
-      value={{ lights, fetch, updateLight, updateLights }}
+      value={{ lights, fetch, updateLight, updateLights, updatePos }}
     >
       {children}
     </LightsContext.Provider>

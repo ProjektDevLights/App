@@ -4,9 +4,9 @@ import { StyleSheet } from "react-native";
 import { Modalize } from "react-native-modalize";
 import {
   Button,
+  Checkbox,
   List,
   Portal,
-  RadioButton,
   Title,
   useTheme,
 } from "react-native-paper";
@@ -42,6 +42,7 @@ export const ApplyDialog = React.forwardRef(
     const snapPoint = 150 + lights.length * 40;
 
     const onPress = (id: string) => {
+      console.log(values);
       if (values.includes(id)) {
         const index: number = values.indexOf(id);
         const old = [...values];
@@ -84,10 +85,9 @@ export const ApplyDialog = React.forwardRef(
           <Title style={styles.title}>{title}</Title>
           {lights.length > 0 ? (
             lights.map((l: Light) => (
-              <RadioButton.Item
+              <Checkbox.Item
                 key={l.id}
                 disabled={ignoreLightOff ? false : !l.isOn}
-                value={l.id}
                 label={l.name}
                 labelStyle={{
                   color:
