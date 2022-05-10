@@ -15,48 +15,30 @@ import {
 import { Modalize } from "react-native-modalize";
 import { Divider, List, useTheme } from "react-native-paper";
 import { useFavourites } from "../../hooks/useFavourites";
+import { Gradient } from "../../hooks/useFavourites/FavouritesProvider";
 import useSnackbar from "../../hooks/useSnackbar";
 import { LightResponse, LightsStackParamList } from "../../interfaces/types";
-import { Gradient } from "../../store/types/favouriteGradients";
 import { ApplyDialog } from "../ApplyDialog/ApplyDialog";
 import Circle from "../Circle";
 
 export function Color(props: {
   colors: string[];
   delete: () => void;
+  onPress: () => void;
 }): JSX.Element {
-  const { colors } = props;
+  const { colors, onPress } = props;
   const snackbar = useSnackbar();
   const theme = useTheme();
   const styles = StyleSheet.create({
     container: { width: "100%" },
     pressable: { alignSelf: "center" },
   });
-  const modalizeRef = React.useRef<Modalize>(null);
-  const onConfirm = (ids: string[]) => {
-    modalizeRef.current?.close();
-    if (ids.length > 0) {
-      ids.forEach((id: string) => {
-        const ax = axios.patch(`/lights/${id}/color`, {
-          colors,
-          pattern: colors.length > 1 ? "gradient" : "plain",
-        });
-        ax.then((res: LightResponse) => {
-          snackbar.makeSnackbar(res.data.message, theme.colors.success);
-        }).catch((err: AxiosError) =>
-          snackbar.makeSnackbar(
-            err.response?.data.message ?? "Nothing changed!",
-            theme.colors.error,
-          ),
-        );
-      });
-    }
-  };
+
   return (
     <>
       <List.Item
         title={colors[0] + (colors[1] ? ` + ${colors[1]}` : "")}
-        onPress={() => modalizeRef?.current?.open()}
+        onPress={onPress}
         style={styles.container}
         left={() => <Circle colors={colors} />}
         right={() => (
@@ -68,13 +50,6 @@ export function Color(props: {
             />
           </TouchableOpacity>
         )}
-      />
-      <ApplyDialog
-        onConfirm={onConfirm}
-        title="Apply favourite color on Light"
-        confirmText="Apply Color"
-        ref={modalizeRef}
-        ids={[]}
       />
     </>
   );
@@ -102,6 +77,44 @@ export default function Favourite(): JSX.Element {
       margin: theme.spacing(4),
     },
   });
+
+  const [currentColors, setCurrentColors] = React.useState<string[]>([]);
+
+  const modalizeRef = React.useRef<Modalize>(null);
+  const onConfirm = (ids: string[]) => {
+    modalizeRef.current?.close();
+    if (ids.length > 0) {
+      ids.forEach((id: string) => {
+        const ax = axios.patch(`/lights/${id}/color`, {
+          currentColors,
+          pattern: colors.length > 1 ? "gradient" : "plain",
+        });
+        ax.then((res: LightResponse) => {
+          setCurrentColors([]);
+          snackbar.makeSnackbar(res.data.message, theme.colors.success);
+        }).catch((err: AxiosError) => {
+          snackbar.makeSnackbar(
+            err.response?.data.message ?? "Nothing changed!",
+            theme.colors.error,
+          );
+          setCurrentColors([]);
+        });
+      });
+    }
+  };
+
+  const dialog = () => {
+    return (
+      <ApplyDialog
+        onConfirm={onConfirm}
+        title="Apply favourite color on Light"
+        confirmText="Apply Color"
+        ref={modalizeRef}
+        ids={[]}
+      />
+    );
+  };
+
   if (colors.length === 0 && gradients.length === 0) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -133,12 +146,17 @@ export default function Favourite(): JSX.Element {
           const array = [g.start, g.end];
           return (
             <Color
+              onPress={() => {
+                setCurrentColors(array);
+                modalizeRef.current?.open();
+              }}
               key={g.start + g.end}
               delete={() => removeGradient(g)}
               colors={array}
             />
           );
         })}
+        {dialog()}
       </ScrollView>
     );
   }
@@ -150,7 +168,15 @@ export default function Favourite(): JSX.Element {
         <View style={{ marginTop: theme.spacing(4) }}>
           <Text style={styles.text}>Colors</Text>
           {colors.map((fav: string) => (
-            <Color key={fav} delete={() => removeColor(fav)} colors={[fav]} />
+            <Color
+              onPress={() => {
+                setCurrentColors([fav]);
+                modalizeRef.current?.open();
+              }}
+              key={fav}
+              delete={() => removeColor(fav)}
+              colors={[fav]}
+            />
           ))}
         </View>
         <Divider />
@@ -159,6 +185,7 @@ export default function Favourite(): JSX.Element {
             You haven`t saved any gradients yet
           </Text>
         </View>
+        {dialog()}
       </ScrollView>
     );
   }
@@ -168,20 +195,33 @@ export default function Favourite(): JSX.Element {
     <ScrollView>
       <Text style={styles.text}> Colors</Text>
       {colors.map((fav: string) => (
-        <Color key={fav} delete={() => removeColor(fav)} colors={[fav]} />
+        <Color
+          onPress={() => {
+            setCurrentColors([fav]);
+            modalizeRef.current?.open();
+          }}
+          key={fav}
+          delete={() => removeColor(fav)}
+          colors={[fav]}
+        />
       ))}
       <Divider />
       <Text style={styles.text}>Gradients</Text>
       {gradients.map((g: Gradient) => {
-        const array = [g.start, g.end];
+        const array: string[] = [g.start, g.end];
         return (
           <Color
+            onPress={() => {
+              setCurrentColors(array);
+              modalizeRef.current?.open();
+            }}
             key={g.start + g.end}
             delete={() => removeGradient(g)}
             colors={array}
           />
         );
       })}
+      {dialog()}
     </ScrollView>
   );
 }

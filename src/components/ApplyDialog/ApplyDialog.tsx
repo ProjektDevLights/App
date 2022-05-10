@@ -42,7 +42,6 @@ export const ApplyDialog = React.forwardRef(
     const snapPoint = 150 + lights.length * 40;
 
     const onPress = (id: string) => {
-      console.log(values);
       if (values.includes(id)) {
         const index: number = values.indexOf(id);
         const old = [...values];

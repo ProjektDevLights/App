@@ -23,7 +23,7 @@ export type LightsStackParamList = {
   };
   custom: {
     id: string;
-    type: "tag" | "light";
+    type: "tag" | "light" | "alarm";
     custom_sequence?: CustomData[];
     onSubmit: () => Promise<Pattern>;
   };
@@ -41,7 +41,7 @@ export type TagsStackParamList = {
   };
   custom: {
     id: string;
-    type: "tag" | "light";
+    type: "tag" | "light" | "alarm";
     onSubmit: () => Promise<Pattern>;
   };
   color_modal: ColorModal;
@@ -52,4 +52,12 @@ export type TagsStackParamList = {
 export type AlarmStackParamList = {
   home: undefined;
   color_modal: ColorModal;
+  alarm_pattern: {
+    id: string;
+  };
+  custom: {
+    id: string;
+    type: "tag" | "light" | "alarm";
+    onSubmit: () => Promise<Pattern>;
+  };
 };

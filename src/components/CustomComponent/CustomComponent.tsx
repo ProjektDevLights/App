@@ -13,7 +13,7 @@ export interface CustomComponentProps {
   colors: string[];
   id: string;
   custom_sequence: CustomData[];
-  type: "light" | "tag";
+  type: "light" | "tag" | "alarm";
   oldPattern: Pattern;
   onSubmit: () => Promise<Pattern>;
 }
@@ -21,6 +21,7 @@ export default function CustomComponent(
   props: CustomComponentProps,
 ): JSX.Element {
   const { colors, custom_sequence, id, type, oldPattern, onSubmit } = props;
+
   const navigation = useNavigation<CustomScreenNavigationProp>();
   const theme = useTheme();
 
@@ -32,6 +33,8 @@ export default function CustomComponent(
       custom_sequence: pCustom_sequence ?? undefined,
     });
   };
+  console.log(custom_sequence);
+
   const styles = StyleSheet.create({
     colors_container: {
       marginTop: theme.spacing(2),

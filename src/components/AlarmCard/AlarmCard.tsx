@@ -7,7 +7,7 @@ import { filter, map, remove } from "lodash";
 import * as React from "react";
 import { Dimensions, StyleSheet, TextInput, View } from "react-native";
 import { Modalize } from "react-native-modalize";
-import { Chip, IconButton, useTheme } from "react-native-paper";
+import { Button, Chip, IconButton, useTheme } from "react-native-paper";
 import { useAlarms } from "../../hooks/useAlarms";
 import useSnackbar from "../../hooks/useSnackbar";
 import ApplyDialog from "../ApplyDialog";
@@ -84,12 +84,11 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
     if (!(await handleEdit(wDays, "days"))) setDays(old);
   };
 
-  /*   const handleColorChange = () => {
-    navigation.navigate("color_modal", {
-      color: alarm.color,
-      onSubmit,
+  const handleColorChange = () => {
+    navigation.navigate("alarm_pattern", {
+      id: alarm.id,
     });
-  }; */
+  };
 
   const styles = StyleSheet.create({
     root: {
@@ -245,14 +244,14 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
       </View>
 
       <View style={styles.color_container}>
-        {/*  <Button
+        <Button
           color={alarm.color}
           style={styles.button}
           mode="contained"
-          //onPress={handleColorChange}
+          onPress={handleColorChange}
         >
           {alarm.color}
-        </Button> */}
+        </Button>
         <IconButton
           size={30}
           onPress={handleDelete}

@@ -18,7 +18,7 @@ export default function AlarmHeader(props: {
 }): JSX.Element {
   const { id, index } = props;
   const theme = useTheme();
-  const { alarms } = useAlarms();
+  const { alarms, updateAlarm } = useAlarms();
   const alarm = alarms.find((a: Alarm) => a.id === id) ?? {
     days: [],
     time: "00:00",
@@ -38,17 +38,11 @@ export default function AlarmHeader(props: {
   const handleValueChange = (value: boolean) => {
     const old = alarm.isOn;
     setIsOn(value);
-    axios
-      .patch(`/alarm/${id}`, {
-        isOn: value,
-      })
-      .catch(() => {
-        setIsOn(old);
-      });
+    updateAlarm({ ...alarm, isOn: value }).catch(() => setIsOn(old));
   };
 
   const handleTimeChange = (time: string) => {
-    axios.patch(`/alarm/${id}`, {
+    axios.patch(`/alarms/${id}`, {
       time,
     });
   };

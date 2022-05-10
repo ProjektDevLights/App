@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
 import { useFavourites } from "../../hooks/useFavourites";
-import { Gradient } from "../../store/types/favouriteGradients";
+import { Gradient } from "../../hooks/useFavourites/FavouritesProvider";
 import { isFavouriteGradient, makeValidColorArray } from "../../utils";
 import { ColorModalScreenNavigationProp } from "../ColorPicker/ColorPicker";
 import FavouriteGradientList from "../FavouriteGradientList";
@@ -86,33 +86,38 @@ export default function GradientComponent(
   const styles = StyleSheet.create({
     buttonContainer: {
       flex: 2,
+      borderColor: "red",
     },
     iconContainer: {
       flex: 1,
+      borderColor: "red",
       justifyContent: "center",
       alignItems: "center",
     },
     container: {
-      flex: 1,
+      borderColor: "red",
       width: Dimensions.get("window").width - theme.spacing(5) * 2,
       marginTop: theme.spacing(4),
       flexDirection: "row",
       alignContent: "space-between",
     },
-    pressable: { alignSelf: "flex-end", marginRight: 10 },
+    pressable: {
+      alignSelf: "flex-end",
+      marginRight: 10,
+      marginTop: favouriteGradients.length === 0 ? theme.spacing(2) : 0,
+    },
     text: {
       fontSize: 20,
       fontFamily: "TitilliumWeb-Regular",
     },
-    list: {},
   });
   return (
-    <>
+    <View>
       {favouriteGradients.length !== 0 ? (
-        <>
+        <View>
           <Text style={styles.text}> Favourite Gradients </Text>
-          <FavouriteGradientList style={styles.list} onPress={props.onSubmit} />
-        </>
+          <FavouriteGradientList onPress={props.onSubmit} />
+        </View>
       ) : null}
       <Pressable style={styles.pressable} onPress={() => saveColor()}>
         <FontAwesomeIcon color={theme.colors.accent} size={30} icon={icon} />
@@ -151,6 +156,6 @@ export default function GradientComponent(
           </Button>
         </View>
       </View>
-    </>
+    </View>
   );
 }

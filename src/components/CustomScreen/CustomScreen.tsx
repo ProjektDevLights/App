@@ -1,10 +1,9 @@
-import { Light, PartialLight, Response } from "@devlights/types";
+import { PartialLight, Response } from "@devlights/types";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { isArray } from "lodash";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Divider, List, useTheme } from "react-native-paper";
@@ -38,11 +37,13 @@ export default function CustomScreen(): JSX.Element {
   };
 
   const onSave = () => {
-    const url = `/${type}s/${id}/custom`;
+    const url = `/${type}s/${id}${type !== "alarm" ? "/custom" : ""}`;
+
     axios
-      .patch(url, {
-        data: custom,
-      })
+      .patch(
+        url,
+        type === "alarm" ? { custom_sequence: custom } : { data: custom },
+      )
       .then((res: AxiosResponse<Response<PartialLight | PartialLight[]>>) => {
         snackbar.makeSnackbar(res.data.message, theme.colors.success);
         if (type === "light") {

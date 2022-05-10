@@ -5,14 +5,17 @@ import React from "react";
 export type AlarmsContextType = {
   alarms: Alarm[];
   fetch: () => Promise<void>;
-  updateAlarm: (a: Alarm) => void;
+  updateAlarm: (
+    a: Alarm,
+    server?: boolean,
+  ) => Promise<AxiosResponse | undefined>;
   updateAlarms: (a: Alarm[]) => void;
 };
 
 export const AlarmsContext = React.createContext<AlarmsContextType>({
   alarms: [],
   fetch: () => new Promise(() => {}),
-  updateAlarm: (a: Alarm) => undefined,
+  updateAlarm: (a: Alarm) => new Promise(() => {}),
   updateAlarms: (a: Alarm[]) => undefined,
 });
 
@@ -25,19 +28,22 @@ function AlarmsProvider(props: AlarmsProviderProps): JSX.Element {
   const [alarms, setAlarms] = React.useState<Alarm[]>([]);
   const alarmsRef = React.useRef(alarms);
   const fetch = async () => {
-    const res: AxiosResponse<Response<Alarm[]>> = await axios.get("/alarm");
+    const res: AxiosResponse<Response<Alarm[]>> = await axios.get("/alarms");
     setAlarms(res.data.object);
   };
 
-  const updateAlarm = (alarm: Alarm, server = false): void => {
+  const updateAlarm = async (alarm: Alarm, server?: boolean) => {
+    let ax;
+
     if (server) {
-      axios.patch(`/alarm/${alarm.id}`, alarm);
+      ax = axios.patch(`/alarms/${alarm.id}`, alarm);
     }
     const index = alarmsRef.current.findIndex((a: Alarm) => a.id === alarm.id);
     if (index > -1) {
       alarmsRef.current[index] = alarm;
       setAlarms([...alarmsRef.current]);
     }
+    return await ax;
   };
 
   const updateAlarms = (pAlarms: Alarm[]): void => {

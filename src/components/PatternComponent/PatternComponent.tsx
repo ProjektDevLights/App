@@ -22,7 +22,7 @@ export interface PatternComponentProps {
     timeout: number | undefined,
   ) => Promise<AxiosResponse>;
   id: string;
-  type: "light" | "tag";
+  type: "light" | "tag" | "alarm";
 }
 
 export default function PatternComponent(
@@ -63,10 +63,12 @@ export default function PatternComponent(
       newColors,
       newTimeout && newTimeout <= 0 ? timeout : newTimeout,
     );
+
     as.then((res: AxiosResponse) => {
+      success = true;
       if (res.status === 304) success = false;
     }).catch(() => {
-      success = true;
+      success = false;
     });
     return success;
   };
