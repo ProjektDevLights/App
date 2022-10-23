@@ -1,12 +1,13 @@
 import { Light } from "@devlights/types";
 import * as React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Modalize } from "react-native-modalize";
 import {
   Button,
   Checkbox,
   List,
   Portal,
+  RadioButton,
   Title,
   useTheme,
 } from "react-native-paper";
@@ -72,6 +73,7 @@ export const ApplyDialog = React.forwardRef(
     return (
       <Portal>
         <Modalize
+          adjustToContentHeight
           snapPoint={snapPoint}
           useNativeDriver
           modalStyle={styles.modal}

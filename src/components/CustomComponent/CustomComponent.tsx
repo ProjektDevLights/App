@@ -33,7 +33,6 @@ export default function CustomComponent(
       custom_sequence: pCustom_sequence ?? undefined,
     });
   };
-  console.log(custom_sequence);
 
   const styles = StyleSheet.create({
     colors_container: {

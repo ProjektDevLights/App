@@ -95,7 +95,7 @@ export default function Alarms(): JSX.Element {
     axios
       .put("/alarm", {
         name: "Alarm",
-        color: "#00ff6a",
+        leds: { colors: ["#00ff6a"], pattern: "plain" },
         days: newAlarm.days,
         time: newAlarm.time,
         ids,

@@ -23,7 +23,7 @@ export default function App(): JSX.Element {
     root: { backgroundColor: "#000", height: "100%", width: "100%" },
   });
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ widht: "100%", height: "100%" }}>
       <View style={styles.root}>
         <HostProvider>
           <SafeAreaProvider>

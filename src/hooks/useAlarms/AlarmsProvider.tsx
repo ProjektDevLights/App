@@ -28,7 +28,7 @@ function AlarmsProvider(props: AlarmsProviderProps): JSX.Element {
   const [alarms, setAlarms] = React.useState<Alarm[]>([]);
   const alarmsRef = React.useRef(alarms);
   const fetch = async () => {
-    const res: AxiosResponse<Response<Alarm[]>> = await axios.get("/alarms");
+    const res: AxiosResponse<Response<Alarm[]>> = await axios.get("/alarm");
     setAlarms(res.data.object);
   };
 
@@ -36,7 +36,7 @@ function AlarmsProvider(props: AlarmsProviderProps): JSX.Element {
     let ax;
 
     if (server) {
-      ax = axios.patch(`/alarms/${alarm.id}`, alarm);
+      ax = axios.patch(`/alarm/${alarm.id}`, alarm);
     }
     const index = alarmsRef.current.findIndex((a: Alarm) => a.id === alarm.id);
     if (index > -1) {

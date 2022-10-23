@@ -66,6 +66,7 @@ export type FavouriteScreenRouteProp = RouteProp<
 >;
 
 export default function Favourite(): JSX.Element {
+  const snackbar = useSnackbar();
   const { colors, gradients, removeColor, removeGradient } = useFavourites();
   const theme = useTheme();
   const styles = StyleSheet.create({
@@ -86,8 +87,8 @@ export default function Favourite(): JSX.Element {
     if (ids.length > 0) {
       ids.forEach((id: string) => {
         const ax = axios.patch(`/lights/${id}/color`, {
-          currentColors,
-          pattern: colors.length > 1 ? "gradient" : "plain",
+          colors: currentColors,
+          pattern: currentColors.length > 1 ? "gradient" : "plain",
         });
         ax.then((res: LightResponse) => {
           setCurrentColors([]);

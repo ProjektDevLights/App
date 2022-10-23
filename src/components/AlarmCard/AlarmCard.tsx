@@ -47,7 +47,7 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
    */
   const handleEdit = async (data: any, key: string): Promise<boolean> => {
     try {
-      updateAlarm({ ...alarm, [key]: data });
+      updateAlarm({ ...alarm, [key]: data }, true);
       /*  await axios.patch(`/alarm/${alarm.id}`, {
         [key]: data,
       }); */
@@ -146,7 +146,7 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
       fontWeight: "600",
     },
   });
-
+  let allDays = [1, 2, 3, 4, 5, 6, 0];
   return (
     <View style={styles.root}>
       <View style={{ flexDirection: "row" }}>
@@ -163,41 +163,14 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
         />
       </View>
       <View style={styles.day_chip_container}>
-        <DayChip
-          day={1}
-          selected={days.includes(1)}
-          onCheckedChanged={handleCheckedChange}
-        />
-        <DayChip
-          day={2}
-          selected={days.includes(2)}
-          onCheckedChanged={handleCheckedChange}
-        />
-        <DayChip
-          day={3}
-          selected={days.includes(3)}
-          onCheckedChanged={handleCheckedChange}
-        />
-        <DayChip
-          day={4}
-          selected={days.includes(4)}
-          onCheckedChanged={handleCheckedChange}
-        />
-        <DayChip
-          day={5}
-          selected={days.includes(5)}
-          onCheckedChanged={handleCheckedChange}
-        />
-        <DayChip
-          day={6}
-          selected={days.includes(6)}
-          onCheckedChanged={handleCheckedChange}
-        />
-        <DayChip
-          day={0}
-          selected={days.includes(7) || days.includes(0)}
-          onCheckedChanged={handleCheckedChange}
-        />
+        {allDays.map((val) => (
+          <DayChip
+            key={val}
+            day={val}
+            selected={days.includes(val)}
+            onCheckedChanged={handleCheckedChange}
+          />
+        ))}
       </View>
 
       <View style={styles.chip_container}>
@@ -245,12 +218,12 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
 
       <View style={styles.color_container}>
         <Button
-          color={alarm.color}
+          color={alarm?.leds?.colors[0] ?? "#fff"}
           style={styles.button}
           mode="contained"
           onPress={handleColorChange}
         >
-          {alarm.color}
+          {alarm.leds.colors}
         </Button>
         <IconButton
           size={30}

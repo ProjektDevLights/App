@@ -42,7 +42,7 @@ export default function AlarmHeader(props: {
   };
 
   const handleTimeChange = (time: string) => {
-    axios.patch(`/alarms/${id}`, {
+    axios.patch(`/alarm/${id}`, {
       time,
     });
   };
