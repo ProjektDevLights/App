@@ -5,13 +5,20 @@ import { useNavigation } from "@react-navigation/core";
 import axios from "axios";
 import { filter, map, remove } from "lodash";
 import * as React from "react";
-import { Dimensions, StyleSheet, TextInput, View } from "react-native";
+import {
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { Modalize } from "react-native-modalize";
 import { Button, Chip, IconButton, useTheme } from "react-native-paper";
 import { useAlarms } from "../../hooks/useAlarms";
 import useSnackbar from "../../hooks/useSnackbar";
 import ApplyDialog from "../ApplyDialog";
 import DayChip from "../DayChip";
+import PatternCard from "../PatternCard/PatternCard";
 
 export interface AlarmCardProps {
   id: string;
@@ -48,18 +55,10 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
   const handleEdit = async (data: any, key: string): Promise<boolean> => {
     try {
       updateAlarm({ ...alarm, [key]: data }, true);
-      /*  await axios.patch(`/alarm/${alarm.id}`, {
-        [key]: data,
-      }); */
       return true;
     } catch {
       return false;
     }
-  };
-
-  const onSubmit = async (c: string): Promise<boolean> => {
-    const response = handleEdit(c, "color");
-    return response;
   };
 
   const handleCheckedChange = async (
@@ -121,7 +120,10 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
       marginTop: theme.spacing(2),
     },
     button: {
-      width: "60%",
+      backgroundColor: "transparent",
+      borderRadius: 12,
+      height: Dimensions.get("screen").height * 0.05,
+      width: "50%",
     },
     addButton: {
       marginLeft: 0,
@@ -145,8 +147,15 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
       fontFamily: "TitilliumWeb-Bold",
       fontWeight: "600",
     },
+    patternCardHeadline: {
+      fontSize: 16,
+      textAlign: "center",
+      marginLeft: theme.spacing(3),
+      alignSelf: "center",
+    },
+    patternCardRoot: { borderRadius: 12 },
   });
-  let allDays = [1, 2, 3, 4, 5, 6, 0];
+  const allDays = [1, 2, 3, 4, 5, 6, 0];
   return (
     <View style={styles.root}>
       <View style={{ flexDirection: "row" }}>
@@ -217,14 +226,16 @@ export default function AlarmCard(props: AlarmCardProps): JSX.Element {
       </View>
 
       <View style={styles.color_container}>
-        <Button
-          color={alarm?.leds?.colors[0] ?? "#fff"}
-          style={styles.button}
-          mode="contained"
-          onPress={handleColorChange}
-        >
-          {alarm.leds.colors}
-        </Button>
+        <View style={styles.button}>
+          <Pressable style={{ borderRadius: 12 }} onPress={handleColorChange}>
+            <PatternCard
+              {...alarm}
+              headlineStyle={styles.patternCardHeadline}
+              name={alarm.leds?.colors?.toString()}
+              rootStyle={styles.patternCardRoot}
+            />
+          </Pressable>
+        </View>
         <IconButton
           size={30}
           onPress={handleDelete}

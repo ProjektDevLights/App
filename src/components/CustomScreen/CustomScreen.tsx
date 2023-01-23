@@ -37,7 +37,10 @@ export default function CustomScreen(): JSX.Element {
   };
 
   const onSave = () => {
-    const url = `/${type}s/${id}${type !== "alarm" ? "/custom" : ""}`;
+    // TODO this is not really useful
+    const url = `/${type}${type !== "alarm" ? "s" : ""}/${id}${
+      type !== "alarm" ? "/custom" : ""
+    }`;
 
     axios
       .patch(

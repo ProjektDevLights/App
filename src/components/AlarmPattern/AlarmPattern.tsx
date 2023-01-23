@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { Pattern } from "@devlights/types";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -43,16 +44,24 @@ export default function AlarmPattern(): JSX.Element {
     let success = true;
 
     if (newPattern !== "custom") {
-      const newColors: string[] = [alarm.leds.colors[0]];
+      const newColors: string[] =
+        alarm.leds?.colors && alarm.leds.colors.length > 0
+          ? [alarm.leds.colors[0]]
+          : [];
 
       if (newPattern === "gradient") {
-        newColors.push(alarm.leds.colors[0]);
+        newColors.push(alarm?.leds?.colors[0] ?? "#1de9b6");
       }
       const ax = updateAlarm(
         {
           ...alarm,
           leds: {
-            colors: ["rainbow", "fading"].includes(newPattern) ? [] : newColors,
+            // TODO
+            colors: ["rainbow", "fading"].includes(newPattern)
+              ? []
+              : newColors.length > 0
+              ? newColors
+              : ["#1de9b6"],
             pattern: newPattern as Pattern,
           },
         },

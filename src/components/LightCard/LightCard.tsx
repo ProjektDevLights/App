@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { Headline, useTheme } from "react-native-paper";
+import { getCardColor, rainbow } from "../../utils";
+import PatternCard from "../PatternCard/PatternCard";
 import Powerbulb from "../Powerbulb";
 import getContrastTextColor from "../textContrast";
 
@@ -23,37 +25,9 @@ export interface CardProps {
 export default function LightCard(props: CardProps): JSX.Element {
   const theme: ReactNativePaper.Theme = useTheme();
   const navigation = useNavigation();
-  const { light } = props;
+  const { light, onLongPress } = props;
   const { colors, pattern } = light.leds;
   const swipeableRef = React.useRef<Swipeable>(null);
-
-  const rainbow: string[] = [
-    "#ff0000",
-    "#ffff00",
-    "#00ff00",
-    "#00ffff",
-    "#0000ff",
-    "#ff00ff",
-  ];
-  const getCardColor = (): string[] => {
-    if (light.isOn) {
-      switch (light.leds.pattern) {
-        case "fading":
-          return rainbow;
-        case "plain":
-        case "runner":
-        case "waking":
-        case "blinking":
-          return light.leds.colors
-            ? [light.leds.colors[0], light.leds.colors[0]]
-            : ["#000", "#000"];
-        default:
-          return light.leds.colors ?? ["#000", "#000"];
-      }
-    } else {
-      return ["#000000", "#000000"];
-    }
-  };
 
   const onPress = (): void => {
     navigation.navigate("light", {
@@ -109,22 +83,6 @@ export default function LightCard(props: CardProps): JSX.Element {
       borderRadius: 12,
     },
     button: { alignItems: "center", justifyContent: "center", flex: 1 },
-    rainbow_container: {
-      flex: 1,
-      flexDirection: "row",
-    },
-    rainbow_view: {
-      flex: 1,
-    },
-    custom_container: {
-      flex: 1,
-      flexDirection: "row",
-      backgroundColor: "#000",
-    },
-    custom_container_inner: {
-      flex: 1,
-      flexDirection: "row",
-    },
   });
 
   const renderAction = (
@@ -150,8 +108,6 @@ export default function LightCard(props: CardProps): JSX.Element {
     );
   };
 
-  let curIndex = -1;
-
   return (
     <Swipeable
       ref={swipeableRef}
@@ -159,76 +115,21 @@ export default function LightCard(props: CardProps): JSX.Element {
       renderRightActions={(p) => renderAction(80, p)}
     >
       <TouchableOpacity
-        onLongPress={props.onLongPress}
+        onLongPress={onLongPress}
         style={styles.touchable}
         onPress={onPress}
       >
         <Headline style={styles.headline}>
           {light.name ?? "Name not avaible"}
         </Headline>
-        {light.leds.pattern !== "rainbow" && light.leds.pattern !== "custom" ? (
-          <LinearGradient
-            style={styles.card}
-            colors={getCardColor()}
-            start={[0.25, 0.25]}
-            end={[0.75, 0.75]}
-          >
-            <Headline style={styles.headline}>
-              {light.name ?? "Name not avaible"}
-            </Headline>
-          </LinearGradient>
-        ) : light.leds.pattern === "rainbow" ? (
-          <>
-            <View style={styles.rainbow_container}>
-              {rainbow.map((c: string) => (
-                <View
-                  key={c}
-                  style={{
-                    ...styles.rainbow_view,
-                    backgroundColor: light.isOn ? c : "#000",
-                  }}
-                />
-              ))}
-            </View>
-          </>
-        ) : (
-          <View style={styles.custom_container}>
-            {
-              light.custom_sequence?.map((c: CustomData) => (
-                <View style={{ flex: c.repeat, flexDirection: "row" }}>
-                  {c.leds.map((col: string) => (
-                    <View
-                      style={{
-                        backgroundColor: light.isOn ? col : "#000",
-                        flex: c.repeat / c.leds.length,
-                      }}
-                    />
-                  ))}
-                </View>
-              ))
-              // @ts-ignore
-              /* getFlexAmounts(light.leds.colors.length).map(
-                (counts: number[]) => (
-                  <View style={styles.custom_container_inner}>
-                    {counts.map((amount: number) => {
-                      curIndex++;
-                      return (
-                        <View
-                          style={{
-                            backgroundColor: light.isOn
-                              ? light.leds.colors[curIndex]
-                              : "#000",
-                            flex: amount,
-                          }}
-                        />
-                      );
-                    })}
-                  </View>
-                ),
-              ) */
-            }
-          </View>
-        )}
+        <PatternCard
+          {...light}
+          headlineStyle={{
+            marginTop: theme.spacing(4),
+            marginLeft: theme.spacing(4),
+          }}
+          rootStyle={{ elevation: 20 }}
+        />
       </TouchableOpacity>
     </Swipeable>
   );

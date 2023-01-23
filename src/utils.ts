@@ -140,3 +140,31 @@ export const isFavouriteGradient = (
   }
   return false;
 };
+export const rainbow: string[] = [
+  "#ff0000",
+  "#ffff00",
+  "#00ff00",
+  "#00ffff",
+  "#0000ff",
+  "#ff00ff",
+];
+
+export const getCardColor = (light: Light): string[] => {
+  if (light.isOn) {
+    switch (light.leds.pattern) {
+      case "fading":
+        return rainbow;
+      case "plain":
+      case "runner":
+      case "waking":
+      case "blinking":
+        return light.leds.colors
+          ? [light.leds.colors[0], light.leds.colors[0]]
+          : ["#000", "#000"];
+      default:
+        return light.leds.colors ?? ["#000", "#000"];
+    }
+  } else {
+    return ["#000000", "#000000"];
+  }
+};
